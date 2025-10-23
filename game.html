@@ -1,45 +1,43 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>Jingooth Fusion 🍉</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
 html,body{
-  margin:0;padding:0;width:100%;height:100%;overflow:hidden;
+  margin:0;padding:0;width:100%;height:100%;
   background:linear-gradient(180deg,#fde2f3,#d8dcff);
-  font-family:'Fredoka One',sans-serif;touch-action:none;
+  font-family:'Fredoka One',sans-serif;overflow:hidden;touch-action:none;
 }
-#gameContainer{
-  position:relative;width:100%;height:100%;display:flex;justify-content:center;align-items:center;
-}
+#gameContainer{position:relative;width:100%;height:100%;display:flex;justify-content:center;align-items:center;}
 canvas{
-  aspect-ratio:420/720;width:100%;max-width:480px;height:auto;touch-action:none;
+  aspect-ratio:420/720;width:100%;max-width:480px;height:auto;
   background:#eef1ff;border-radius:20px;box-shadow:0 6px 14px rgba(0,0,0,.2);
 }
-#preview{
-  position:absolute;top:10%;left:50%;transform:translateX(-50%);
-  width:70px;height:70px;pointer-events:none;transition:transform .2s;
+.scorebox{
+  position:absolute;top:3%;left:50%;transform:translateX(-50%);
+  background:#fff8fb;border:3px solid #ff5b8a;border-radius:18px;padding:6px 16px;
+  font-size:26px;color:#ff5b8a;font-weight:900;text-shadow:1px 1px 0 #fff;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
 }
 .cute-line{
-  position:absolute;top:16%;left:50%;transform:translateX(-50%);
+  position:absolute;top:17%;left:50%;transform:translateX(-50%);
   width:78%;height:6px;border-radius:10px;
   background:repeating-linear-gradient(90deg,#ffd7ef,#ffd7ef 12px,#fff0fa 12px,#fff0fa 24px);
   box-shadow:0 2px 6px rgba(255,200,230,.4);
 }
-.scorebox{
-  position:absolute;top:3%;left:50%;transform:translateX(-50%);
-  background:#fff8fb;border:3px solid #ff5b8a;border-radius:18px;padding:4px 16px;
-  font-size:26px;color:#ff5b8a;font-weight:900;text-shadow:1px 1px 0 #fff;
-  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+#preview{
+  position:absolute;top:11%;left:50%;transform:translateX(-50%);
+  width:70px;height:70px;pointer-events:none;
 }
 .panel{
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
   background:rgba(0,0,0,0.45);z-index:10;text-align:center;
 }
 .card{
-  background:#fff;border-radius:20px;padding:26px;width:85%;max-width:380px;
+  background:#fff;border-radius:20px;padding:24px;width:85%;max-width:380px;
   box-shadow:0 10px 25px rgba(0,0,0,.25);
 }
 .card h1{font-size:22px;margin-bottom:8px;color:#ff5b8a;}
@@ -50,10 +48,7 @@ canvas{
 }
 .btn.primary{background:#8aa7ff;}
 .btn.secondary{background:linear-gradient(145deg,#ffa8d8,#ffbde5);border:2px solid #ff87ca;}
-footer{
-  position:fixed;bottom:8px;right:10px;
-  color:#7a9cff;font-size:13px;font-weight:600;text-shadow:0 1px 2px rgba(255,255,255,.8);
-}
+footer{position:fixed;bottom:8px;right:10px;color:#7a9cff;font-size:13px;font-weight:600;}
 .pulse{animation:scorePulse .3s ease-in-out;}
 @keyframes scorePulse{0%{transform:scale(1);}50%{transform:scale(1.25);}100%{transform:scale(1);}}
 </style>
@@ -62,8 +57,8 @@ footer{
 <body>
 <div id="gameContainer">
   <canvas id="game" width="420" height="720"></canvas>
-  <img id="preview" src="">
   <div class="cute-line"></div>
+  <img id="preview" src="">
   <div class="scorebox">⭐ <span id="score">0</span></div>
 </div>
 
@@ -81,24 +76,29 @@ footer{
 <audio id="soundDrop" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2f5a0e7b8f.mp3?filename=pop-94319.mp3" preload="auto"></audio>
 <audio id="soundMerge" src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_00e08ad807.mp3?filename=soft-bling-1046.mp3" preload="auto"></audio>
 <audio id="soundOver" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_34563f6ef3.mp3?filename=cute-little-failure-94669.mp3" preload="auto"></audio>
+<audio id="bgm" src="https://cdn.pixabay.com/download/audio/2022/03/09/audio_bf188c76da.mp3?filename=happy-day-11157.mp3" loop preload="auto"></audio>
 
 <script>
 const IMG_COUNT=12;
 const IMG_PATHS=Array.from({length:IMG_COUNT},(_,i)=>`images/face${i+1}.png`);
 let Engine,Render,World,Bodies,Events,engine,world,textures=[];
 let allowDrop=false,dropX=210,score=0,nextLevel=1,gameOver=false,lastDrop=0;
-const SAFE_LINE_Y=120,BUFFER=40;
-const canvas=document.getElementById('game'),scoreEl=document.getElementById('score'),
-preview=document.getElementById('preview'),panel=document.getElementById('panel'),
-btnStart=document.getElementById('btnStart'),btnBack=document.getElementById('btnBack');
+const SAFE_LINE_Y=140,BUFFER=30;
+const canvas=document.getElementById('game'),
+scoreEl=document.getElementById('score'),
+preview=document.getElementById('preview'),
+panel=document.getElementById('panel'),
+btnStart=document.getElementById('btnStart'),
+btnBack=document.getElementById('btnBack');
 const sDrop=document.getElementById('soundDrop'),
 sMerge=document.getElementById('soundMerge'),
-sOver=document.getElementById('soundOver');
+sOver=document.getElementById('soundOver'),
+bgm=document.getElementById('bgm');
 let audioUnlocked=false;
 
 function unlockAudio(){
   if(audioUnlocked)return;
-  [sDrop,sMerge,sOver].forEach(a=>{
+  [sDrop,sMerge,sOver,bgm].forEach(a=>{
     const playPromise=a.play();
     if(playPromise!==undefined){
       playPromise.then(()=>{a.pause();a.currentTime=0;});
@@ -137,7 +137,7 @@ function setupMatter(){
 
 function addPiece(level,x=210){
   const r=18+level*6,tex=textures[level-1];
-  const body=Bodies.circle(x,80,r,{restitution:0.15,friction:0.001,
+  const body=Bodies.circle(x,100,r,{restitution:0.15,friction:0.001,
     render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}});
   body.custom={level};
   World.add(world,body);
@@ -155,7 +155,8 @@ function merge(a,b){
     score+=lvl*10;sMerge.currentTime=0;sMerge.play();
   }else score+=lvl*25;
   scoreEl.textContent=score;
-  scoreEl.classList.add("pulse");setTimeout(()=>scoreEl.classList.remove("pulse"),300);
+  scoreEl.classList.add("pulse");
+  setTimeout(()=>scoreEl.classList.remove("pulse"),300);
   checkGameOver();
 }
 
@@ -174,9 +175,9 @@ function dropPiece(){
 
 function checkGameOver(){
   const all=Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
-  if(all.length<8)return;
-  const top=Math.min(...all.map(b=>b.position.y-(b.circleRadius||0)));
-  if(top<SAFE_LINE_Y-BUFFER)endGame();
+  if(all.length<15)return; // ต้องมีชิ้นเยอะพอ
+  const topPieces=all.filter(b=>b.position.y<200);
+  if(topPieces.length>4){endGame();}
 }
 
 function initControls(){
@@ -196,7 +197,7 @@ function initControls(){
 function endGame(){
   if(gameOver)return;
   gameOver=true;allowDrop=false;
-  try{sOver.currentTime=0;sOver.play();}catch{}
+  try{sOver.currentTime=0;sOver.play();bgm.pause();}catch{}
   panel.style.display='flex';
   panel.querySelector('h1').innerText='Game Over 💥';
   panel.querySelector('p').innerText='Thanks for smiling with Yeo Jin Goo 🌸';
@@ -212,6 +213,7 @@ async function boot(){
 btnStart.addEventListener('click',()=>{
   unlockAudio();
   panel.style.display='none';
+  bgm.volume=0.25;bgm.currentTime=0;bgm.play();
   if(engine){
     const bodies=Matter.Composite.allBodies(engine.world);
     for(const b of bodies){if(!b.isStatic)World.remove(world,b);}
@@ -224,4 +226,3 @@ btnStart.addEventListener('click',()=>{
 </script>
 </body>
 </html>
-

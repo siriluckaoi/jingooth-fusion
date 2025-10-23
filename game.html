@@ -1,10 +1,336 @@
-<!-- เพิ่ม Firebase config ของคุณเรียบร้อยแล้ว -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Jingooth Fusion 🍉</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+html,body{
+  margin:0;padding:0;width:100%;height:100%;
+  background:linear-gradient(180deg,#fde2f3,#d8dcff);
+  font-family:'Fredoka One',sans-serif;overflow:hidden;touch-action:none;
+}
+#gameContainer{
+  position:relative;width:100%;height:100%;
+  display:flex;justify-content:center;align-items:center;
+}
+canvas.main {
+  aspect-ratio:420/648;
+  width:100%;max-width:480px;height:auto;
+  background:#eef1ff;border-radius:20px;
+  box-shadow:0 6px 14px rgba(0,0,0,.2);
+}
+canvas.fx {
+  position:absolute;inset:0;margin:auto;
+  width:100%;max-width:480px;height:auto;
+  aspect-ratio:420/648;
+  pointer-events:none; /* รับแสงวิบวับอย่างเดียว */
+}
+.scorebox{
+  position:absolute;top:3%;left:50%;transform:translateX(-50%);
+  background:#fff8fb;border:3px solid #ff5b8a;border-radius:18px;
+  padding:6px 16px;font-size:26px;color:#ff5b8a;font-weight:900;
+  text-shadow:1px 1px 0 #fff;box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+.cute-line{
+  position:absolute;top:17%;left:50%;transform:translateX(-50%);
+  width:78%;height:6px;border-radius:10px;
+  background:repeating-linear-gradient(90deg,#ffd7ef,#ffd7ef 12px,#fff0fa 12px,#fff0fa 24px);
+  box-shadow:0 2px 6px rgba(255,200,230,.4);
+}
+#preview{
+  position:absolute;top:11%;left:50%;transform:translateX(-50%);
+  width:70px;height:70px;pointer-events:none;
+}
+.panel{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.45);z-index:10;text-align:center;
+}
+.card{
+  background:#fff;border-radius:20px;padding:24px;width:85%;max-width:380px;
+  box-shadow:0 10px 25px rgba(0,0,0,.25);
+}
+.card h1{font-size:22px;margin-bottom:8px;color:#ff5b8a;}
+.card p{font-size:14px;color:#555;margin-bottom:12px;}
+.btn{
+  border:none;border-radius:12px;padding:12px 18px;margin:6px;
+  font-weight:700;font-size:16px;color:#fff;cursor:pointer;
+}
+.btn.primary{background:#8aa7ff;}
+.btn.secondary{
+  background:linear-gradient(145deg,#ffa8d8,#ffbde5);
+  border:2px solid #ff87ca;
+}
+footer{
+  position:fixed;bottom:8px;right:10px;
+  color:#7a9cff;font-size:13px;font-weight:600;
+  text-shadow:0 1px 2px rgba(255,255,255,.8);
+}
+.pulse{animation:scorePulse .3s ease-in-out;}
+@keyframes scorePulse{0%{transform:scale(1);}50%{transform:scale(1.25);}100%{transform:scale(1);}}
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+</head>
+<body>
+<div id="gameContainer">
+  <!-- main canvas (ฟิสิกส์/ภาพเกม) -->
+  <canvas id="game" class="main" width="420" height="648"></canvas>
+  <!-- overlay canvas สำหรับเอฟเฟกต์ sparkle -->
+  <canvas id="fx" class="fx" width="420" height="648"></canvas>
+
+  <div class="cute-line"></div>
+  <img id="preview" src="">
+  <div class="scorebox">⭐ <span id="score">0</span></div>
+</div>
+
+<div id="panel" class="panel">
+  <div class="card">
+    <h1>Smile with Yeo Jin-goo 💕</h1>
+    <p>Tap to drop and merge the smiling faces!</p>
+    <button class="btn primary" id="btnStart">Start Game</button>
+    <button class="btn secondary" id="btnBack" style="display:none;" onclick="window.location.href='index.html'">🏠 Back to Main</button>
+  </div>
+</div>
+
+<footer>by: namaoi.sweet 💕</footer>
+
+<script>
+/* =========================
+   Config & Globals
+========================= */
+const IMG_COUNT=12;
+const IMG_PATHS=Array.from({length:IMG_COUNT},(_,i)=>`images/face${i+1}.png`);
+let Engine,Render,World,Bodies,Events,engine,world,textures=[];
+let allowDrop=false,dropX=210,score=0,nextLevel=1,gameOver=false,lastDrop=0;
+const canvas=document.getElementById('game');
+const fxCanvas=document.getElementById('fx');
+const fxCtx=fxCanvas.getContext('2d');
+const scoreEl=document.getElementById('score');
+const preview=document.getElementById('preview');
+const panel=document.getElementById('panel');
+const btnStart=document.getElementById('btnStart');
+const btnBack=document.getElementById('btnBack');
+
+/* ======== Audio (AudioContext) ======== */
+let audioCtx=null,audioBuffers={},bgmSource=null;
+const sounds={
+  drop:"https://cdn.pixabay.com/download/audio/2022/03/15/audio_2f5a0e7b8f.mp3?filename=pop-94319.mp3",
+  merge:"https://cdn.pixabay.com/download/audio/2021/09/06/audio_00e08ad807.mp3?filename=soft-bling-1046.mp3",
+  over:"https://cdn.pixabay.com/download/audio/2022/03/15/audio_34563f6ef3.mp3?filename=cute-little-failure-94669.mp3",
+  bgm:"https://cdn.pixabay.com/download/audio/2022/03/09/audio_bf188c76da.mp3?filename=happy-day-11157.mp3"
+};
+async function initAudio(){
+  if(audioCtx) return;
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  for(const [key,url] of Object.entries(sounds)){
+    const res=await fetch(url,{cache:'force-cache'});
+    const buf=await res.arrayBuffer();
+    audioBuffers[key]=await audioCtx.decodeAudioData(buf);
+  }
+}
+function playSound(name,loop=false,vol=1){
+  if(!audioCtx||!audioBuffers[name])return;
+  const src=audioCtx.createBufferSource();
+  const gain=audioCtx.createGain();
+  gain.gain.value=vol;
+  src.buffer=audioBuffers[name]; src.loop=loop;
+  src.connect(gain).connect(audioCtx.destination);
+  src.start(0);
+  if(name==='bgm') bgmSource=src;
+  return src;
+}
+function stopBGM(){ if(bgmSource){try{bgmSource.stop();}catch{} bgmSource=null;} }
+
+/* ======== Images ======== */
+async function loadImages(){
+  return Promise.all(IMG_PATHS.map(src=>new Promise((res,rej)=>{
+    const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=src;
+  })));
+}
+
+/* ======== Matter.js ======== */
+function setupMatter(){
+  Engine=Matter.Engine; Render=Matter.Render; World=Matter.World; Bodies=Matter.Bodies; Events=Matter.Events;
+  engine=Engine.create();
+  const render=Render.create({canvas,engine,options:{width:420,height:648,wireframes:false,background:'transparent'}});
+  world=engine.world;
+  // floor + walls
+  World.add(world,[
+    Bodies.rectangle(210,660,420,40,{isStatic:true}),
+    Bodies.rectangle(-20,324,40,648,{isStatic:true}),
+    Bodies.rectangle(440,324,40,648,{isStatic:true})
+  ]);
+  Matter.Runner.run(Matter.Runner.create(),engine);
+  Render.run(render);
+
+  // merge detection
+  Events.on(engine,'collisionStart',e=>{
+    for(const p of e.pairs){
+      const a=p.bodyA,b=p.bodyB;
+      if(a.custom&&b.custom&&a.custom.level===b.custom.level&&!a.merged&&!b.merged){
+        a.merged=b.merged=true;
+        setTimeout(()=>merge(a,b),100);
+      }
+    }
+  });
+}
+
+function addPiece(level,x=210){
+  const r=18+level*6,tex=textures[level-1];
+  const body=Bodies.circle(x,90,r,{
+    restitution:0.15,friction:0.001,
+    render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}
+  });
+  body.custom={level};
+  World.add(world,body);
+  playSound('drop',false,0.45);
+  return body;
+}
+
+function merge(a,b){
+  const lvl=a.custom.level;
+  const nx=(a.position.x+b.position.x)/2, ny=(a.position.y+b.position.y)/2;
+  World.remove(world,a); World.remove(world,b);
+
+  // sparkle effect at (nx, ny)
+  sparkle(nx, ny);
+
+  if(lvl<IMG_COUNT){
+    const c=addPiece(lvl+1,nx);
+    Matter.Body.setPosition(c,{x:nx,y:ny});
+    score+=lvl*10; playSound('merge',false,0.55);
+  } else {
+    score+=lvl*25;
+  }
+  scoreEl.textContent=score;
+  scoreEl.classList.add('pulse');
+  setTimeout(()=>scoreEl.classList.remove('pulse'),300);
+
+  checkGameOver();
+}
+
+function scheduleNextLevel(){
+  const r=Math.random();
+  nextLevel = r<.6?1 : r<.85?2 : r<.95?3 : 4;
+  preview.src = textures[nextLevel-1].src;
+}
+
+function dropPiece(){
+  const now=Date.now();
+  if(!allowDrop||gameOver||now-lastDrop<420) return;
+  lastDrop=now;
+  addPiece(nextLevel, Math.max(30, Math.min(390, dropX)));
+  scheduleNextLevel();
+}
+
+function checkGameOver(){
+  // เงื่อนไขอ่อนลง: ต้องมีชิ้นจำนวนมากและสูงจริง ๆ
+  const all = Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
+  if(all.length<15) return;
+  const nearTop = all.filter(b => (b.position.y - (b.circleRadius||0)) < 120);
+  if(nearTop.length > 6) endGame();
+}
+
+/* ======== Controls ======== */
+function initControls(){
+  const move=e=>{
+    const rect=canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const x=(clientX-rect.left)*(420/rect.width);
+    dropX = Math.max(30, Math.min(390, x));
+    // move preview DOM to finger (screen coords)
+    preview.style.left = `${clientX}px`;
+  };
+  canvas.addEventListener('mousemove',move);
+  canvas.addEventListener('touchmove',move,{passive:true});
+  const dropOnce=()=>dropPiece();
+  canvas.addEventListener('click',dropOnce);
+  canvas.addEventListener('touchend',dropOnce,{passive:true});
+}
+
+/* =========================
+   Sparkle FX (overlay canvas)
+========================= */
+const fxParticles=[];
+function sparkle(x,y){
+  // สร้างอนุภาค 16 ชิ้น กระจายออกจากจุดรวม
+  for(let i=0;i<16;i++){
+    const ang = (Math.PI*2*i)/16 + Math.random()*0.3;
+    const spd = 2 + Math.random()*2.5;
+    fxParticles.push({
+      x, y, vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd,
+      r: 2.2 + Math.random()*1.8, life: 38 + Math.random()*12
+    });
+  }
+}
+
+function renderFX(){
+  fxCtx.clearRect(0,0,fxCanvas.width,fxCanvas.height);
+  for(let i=fxParticles.length-1;i>=0;i--){
+    const p=fxParticles[i];
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; // gravity เบาๆ
+    p.life--;
+    const alpha = Math.max(0, p.life/50);
+    fxCtx.beginPath();
+    fxCtx.fillStyle = `rgba(255,200,240,${alpha})`;
+    fxCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    fxCtx.fill();
+    // ไฮไลท์ขาว
+    fxCtx.beginPath();
+    fxCtx.fillStyle = `rgba(255,255,255,${alpha})`;
+    fxCtx.arc(p.x-p.r*0.3,p.y-p.r*0.3,p.r*0.5,0,Math.PI*2);
+    fxCtx.fill();
+    if(p.life<=0) fxParticles.splice(i,1);
+  }
+  requestAnimationFrame(renderFX);
+}
+requestAnimationFrame(renderFX);
+
+/* =========================
+   Boot
+========================= */
+async function boot(){
+  textures = await loadImages();
+  setupMatter(); initControls(); scheduleNextLevel(); allowDrop=true;
+}
+
+btnStart.addEventListener('click', async ()=>{
+  // ปลดล็อกเสียง: ต้องมาจาก user gesture เสมอ
+  if(!audioCtx){ await initAudio(); }
+  // เริ่มเพลง bgm เบาๆ
+  playSound('bgm', true, 0.22);
+
+  panel.style.display='none';
+  if(engine){
+    const bodies=Matter.Composite.allBodies(engine.world);
+    for(const b of bodies){ if(!b.isStatic) Matter.World.remove(world,b); }
+    score=0; scoreEl.textContent='0'; gameOver=false;
+    scheduleNextLevel(); allowDrop=true; btnBack.style.display='none';
+    return;
+  }
+  boot();
+});
+
+function endGame(){
+  if(gameOver) return;
+  gameOver=true; allowDrop=false;
+  stopBGM(); playSound('over', false, 0.7);
+  panel.style.display='flex';
+  panel.querySelector('h1').innerText='Game Over 💥';
+  panel.querySelector('p').innerText='Thanks for smiling with Yeo Jin Goo 🌸';
+  btnStart.textContent='🔄 Play Again';
+  btnBack.style.display='inline-block';
+}
+</script>
+
+  <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
 // =========================
-// Firebase Config
+// Firebase Config ของคุณ
 // =========================
 const firebaseConfig = {
   apiKey: "AIzaSyAJZM3DMlhfo5GbGKd-8CTjGYQ6CPL2XxU",
@@ -21,7 +347,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // =========================
-// บันทึกคะแนนเมื่อจบเกม
+// ฟังก์ชันบันทึกคะแนน
 // =========================
 async function saveScore(name, score){
   try {
@@ -30,41 +356,36 @@ async function saveScore(name, score){
       score: score,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    console.log("✅ Saved to Firestore:", name, score);
   } catch(e) {
-    console.error("❌ Error saving:", e);
+    console.error("❌ Save error:", e);
   }
 }
 
 // =========================
-// แสดง Leaderboard
+// ฟังก์ชันแสดง Leaderboard
 // =========================
 async function showLeaderboard(){
   try {
-    const querySnap = await db.collection("scores")
-      .orderBy("score","desc")
-      .limit(10)
-      .get();
-    let html = `<div class="leaderboard"><h2>🏆 Leaderboard (Top 10)</h2><ol>`;
-    querySnap.forEach(doc=>{
+    const snap = await db.collection("scores")
+      .orderBy("score", "desc").limit(10).get();
+    let html = `<div class="leaderboard"><h2>🏆 Leaderboard</h2><ol>`;
+    snap.forEach(doc=>{
       const d = doc.data();
-      html += `<li>${d.name || "Guest"} — ${d.score || 0}</li>`;
+      html += `<li>${d.name || "Guest"} — ${d.score}</li>`;
     });
     html += `</ol></div>`;
-    const panel = document.getElementById("panel");
-    const card = panel.querySelector(".card");
+    const card = document.querySelector(".card");
     const old = card.querySelector(".leaderboard");
     if(old) old.remove();
     card.insertAdjacentHTML("beforeend", html);
-  } catch(e){
-    console.warn("⚠️ Cannot load leaderboard:", e);
-  }
+  } catch(e){ console.warn("⚠️ Leaderboard error:", e); }
 }
 
 // =========================
-// ฟังก์ชันจบเกม (ตัวอย่างที่ต้องแทรกในโค้ดหลัก)
+// แก้ฟังก์ชัน endGame ของคุณให้เรียก Firestore
 // =========================
-async function endGame(){
+const oldEndGame = endGame;
+endGame = async function(){
   if(gameOver) return;
   gameOver = true; allowDrop = false;
   stopBGM(); playSound('over', false, 0.7);
@@ -79,5 +400,8 @@ async function endGame(){
   panel.querySelector('p').innerText='Thanks for smiling with Yeo Jin Goo 🌸';
   btnStart.textContent='🔄 Play Again';
   btnBack.style.display='inline-block';
-}
+};
 </script>
+
+</body>
+</html>

@@ -25,19 +25,13 @@
       background:rgba(255,255,255,.8);
       backdrop-filter:blur(8px);
       z-index:5;
-      font-weight:600;
-      color:#444;
+      font-weight:600;color:#444;
     }
     .brand{color:#7a9cff;}
     .hud{display:flex;gap:12px;}
-    .wrap{
-      display:flex;align-items:center;justify-content:center;
-      min-height:100vh;
-      padding-top:70px;
-    }
+    .wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:70px;}
     canvas{
-      background:#eef1ff;
-      border-radius:16px;
+      background:#eef1ff;border-radius:16px;
       box-shadow:0 8px 20px rgba(0,0,0,.1);
       max-width:100%;height:auto;
       touch-action:none;
@@ -49,23 +43,13 @@
       z-index:10;
     }
     .card{
-      background:#fff;
-      border-radius:18px;
-      padding:24px;
-      text-align:center;
-      box-shadow:0 10px 30px rgba(0,0,0,.25);
-      width:min(90vw,400px);
+      background:#fff;border-radius:18px;padding:24px;text-align:center;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);width:min(90vw,400px);
     }
     .btn{
-      padding:12px 20px;
-      border:none;
-      border-radius:12px;
-      background:var(--accent);
-      color:#fff;
-      font-weight:700;
-      cursor:pointer;
-      font-size:16px;
-      margin-top:12px;
+      padding:12px 20px;border:none;border-radius:12px;
+      background:var(--accent);color:#fff;font-weight:700;
+      cursor:pointer;font-size:16px;margin-top:12px;
     }
     footer{
       position:fixed;bottom:8px;right:12px;
@@ -106,8 +90,7 @@
   const canvas = document.getElementById('game');
   const scoreEl = document.getElementById('score');
   const nextEl = document.getElementById('nextLevel');
-
-  let Engine, Render, World, Bodies, Body, Events, Composite;
+  let Engine, Render, World, Bodies, Events, Composite;
   let engine, render, world;
   let textures = [];
   let nextLevel = 1;
@@ -115,37 +98,34 @@
   let dropX = canvas.width/2;
   let score = 0;
   let gameOver = false;
-  let started = false;
+  let sensorActive = false;
+  let lastDropTime = 0;
+
+  const LOAD_DELAY = 800; // ms
+  const SAFE_SENSOR_DELAY = 1500; // ms
 
   function loadImages(paths){
     return Promise.all(paths.map(src=>new Promise((res,rej)=>{
-      const img=new Image();
-      img.onload=()=>res(img);
-      img.onerror=rej;
-      img.src=src;
+      const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=src;
     })));
   }
 
   function setupMatter(){
-    Engine=Matter.Engine;Render=Matter.Render;
-    World=Matter.World;Bodies=Matter.Bodies;Body=Matter.Body;
-    Events=Matter.Events;Composite=Matter.Composite;
-
+    Engine=Matter.Engine; Render=Matter.Render;
+    World=Matter.World; Bodies=Matter.Bodies; Events=Matter.Events;
     engine=Engine.create();
     render=Render.create({
-      canvas:canvas,engine:engine,
+      canvas, engine,
       options:{wireframes:false,background:'transparent'}
     });
     world=engine.world;
-
-    const w=canvas.width,h=canvas.height,t=40;
+    const w=canvas.width, h=canvas.height, t=40;
     World.add(world,[
       Bodies.rectangle(w/2,h+t/2,w,t,{isStatic:true}),
       Bodies.rectangle(-t/2,h/2,t,h,{isStatic:true}),
       Bodies.rectangle(w+t/2,h/2,t,h,{isStatic:true})
     ]);
-
-    const topSensor=Bodies.rectangle(w/2,100,w-20,10,{isStatic:true,isSensor:true,label:'topSensor'});
+    const topSensor=Bodies.rectangle(w/2,80,w-40,10,{isStatic:true,isSensor:true,label:'topSensor'});
     World.add(world,topSensor);
 
     Events.on(engine,'collisionStart',e=>{
@@ -160,7 +140,9 @@
     });
 
     Events.on(engine,'collisionActive',e=>{
-      if(!started) return; // ignore early collisions
+      if(!sensorActive) return;
+      const all=Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
+      if(all.length<4) return; // wait until few pieces exist
       for(const p of e.pairs){
         const a=p.bodyA,b=p.bodyB;
         if((a.label==='topSensor'&&b.custom)||(b.label==='topSensor'&&a.custom)){
@@ -176,7 +158,7 @@
   function addPiece(level,x=canvas.width/2){
     const r=18+level*6;
     const tex=textures[level-1];
-    const body=Bodies.circle(x,40,r,{
+    const body=Bodies.circle(x,50,r,{
       restitution:0.2,friction:0.001,
       render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}
     });
@@ -189,7 +171,7 @@
     const level=a.custom.level;
     const nx=(a.position.x+b.position.x)/2;
     const ny=(a.position.y+b.position.y)/2;
-    World.remove(world,a);World.remove(world,b);
+    World.remove(world,a); World.remove(world,b);
     if(level<IMG_COUNT){
       const c=addPiece(level+1,nx);
       Matter.Body.setPosition(c,{x:nx,y:ny});
@@ -204,27 +186,30 @@
     nextEl.textContent=nextLevel;
   }
 
+  function dropPiece(){
+    if(!allowDrop||gameOver) return;
+    const now=Date.now();
+    if(now-lastDropTime<500) return; // prevent double drop
+    lastDropTime=now;
+    addPiece(nextLevel,Math.max(30,Math.min(canvas.width-30,dropX)));
+    scheduleNextLevel();
+  }
+
   function initControls(){
     const move=e=>{
       const rect=canvas.getBoundingClientRect();
       const clientX=e.touches?e.touches[0].clientX:e.clientX;
       dropX=(clientX-rect.left)*(canvas.width/rect.width);
     };
-    const drop=()=>{
-      if(!allowDrop||gameOver)return;
-      started=true;
-      addPiece(nextLevel,Math.max(30,Math.min(canvas.width-30,dropX)));
-      scheduleNextLevel();
-    };
     canvas.addEventListener('mousemove',move);
     canvas.addEventListener('touchmove',move,{passive:true});
-    canvas.addEventListener('click',drop);
-    canvas.addEventListener('touchend',drop,{passive:true});
+    canvas.addEventListener('click',dropPiece);
+    canvas.addEventListener('touchend',dropPiece,{passive:true});
   }
 
   function endGame(){
     if(gameOver) return;
-    gameOver=true;allowDrop=false;
+    gameOver=true; allowDrop=false;
     const panel=document.getElementById('start');
     panel.style.display='flex';
     panel.querySelector('h1').innerText='Game Over 💥';
@@ -238,6 +223,8 @@
     initControls();
     scheduleNextLevel();
     allowDrop=true;
+    // Delay sensor activation
+    setTimeout(()=>sensorActive=true,SAFE_SENSOR_DELAY);
   }
 
   window.startGame=()=>{
@@ -245,11 +232,12 @@
     if(engine){
       const bodies=Matter.Composite.allBodies(engine.world);
       for(const b of bodies){if(!b.isStatic)Matter.World.remove(engine.world,b);}
-      score=0;scoreEl.textContent='0';gameOver=false;started=false;
-      scheduleNextLevel();allowDrop=true;
+      score=0;scoreEl.textContent='0';gameOver=false;
+      scheduleNextLevel();allowDrop=true;sensorActive=false;
+      setTimeout(()=>sensorActive=true,SAFE_SENSOR_DELAY);
       return;
     }
-    boot();
+    setTimeout(boot,LOAD_DELAY);
   };
 })();
 </script>

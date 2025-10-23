@@ -1,92 +1,92 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
-<title>Jingooth Fusion Game 💫</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
+<title>Jingooth Fusion Game 💕</title>
 <style>
-  :root{
-    --accent:#8aa7ff;
-    --bg1:#fde2f3;
-    --bg2:#d8dcff;
-    --line:#ffd8f0;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family:'Noto Sans Thai',system-ui,sans-serif;
-    background:linear-gradient(180deg,var(--bg1),var(--bg2));
-    overflow:hidden;
-    touch-action:none;
-  }
-  header{
-    position:fixed;top:0;left:0;right:0;
-    display:flex;justify-content:space-between;align-items:center;
-    padding:10px 14px;background:rgba(255,255,255,.85);
-    backdrop-filter:blur(8px);
-    z-index:5;font-weight:600;color:#444;
-  }
-  .brand{color:#7a9cff;}
-  .hud{display:flex;gap:12px;}
-  .wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:70px;}
-  canvas{
-    background:#eef1ff;border-radius:16px;
-    box-shadow:0 8px 20px rgba(0,0,0,.1);
-    max-width:100%;height:auto;
-  }
-  .panel{
-    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-    background:rgba(10,15,40,.5);z-index:10;
-  }
-  .card{
-    background:#fff;border-radius:18px;padding:24px;text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,.25);width:min(90vw,400px);
-  }
-  .btn{
-    padding:12px 20px;border:none;border-radius:12px;
-    background:var(--accent);color:#fff;font-weight:700;
-    cursor:pointer;font-size:16px;margin-top:12px;
-  }
-  footer{
-    position:fixed;bottom:8px;right:12px;color:#7a9cff;font-size:14px;
-    text-shadow:0 1px 2px rgba(255,255,255,.8);font-weight:600;
-  }
-  #preview{
-    position:absolute;top:80px;left:50%;transform:translateX(-50%);
-    width:64px;height:64px;pointer-events:none;
-    filter:drop-shadow(0 3px 3px rgba(0,0,0,0.15));
-    animation:bounce 2s infinite ease-in-out;
-  }
-  @keyframes bounce{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,-10px);}}
-  .cute-line{
-    position:absolute;top:120px;left:50%;transform:translateX(-50%);
-    width:70%;height:10px;border-radius:10px;
-    background:repeating-linear-gradient(90deg,#ffd7ef,#ffd7ef 10px,#fff0fa 10px,#fff0fa 20px);
-    box-shadow:0 2px 6px rgba(255,200,230,.4);
-  }
-  .cute-line::after{
-    content:'💖';position:absolute;right:-18px;top:-12px;font-size:18px;
-    animation:heart 1.5s infinite ease-in-out;
-  }
-  @keyframes heart{0%,100%{transform:scale(1);}50%{transform:scale(1.3);}}
+:root{
+  --accent:#8aa7ff;
+  --bg1:#fde2f3;
+  --bg2:#d8dcff;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:'Noto Sans Thai',system-ui,sans-serif;
+  background:linear-gradient(180deg,var(--bg1),var(--bg2));
+  overflow:hidden;touch-action:none;
+}
+header{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 16px;z-index:10;
+}
+.scorebox{
+  background:rgba(255,255,255,0.8);
+  border:2px solid #ffc8eb;border-radius:12px;
+  padding:8px 16px;font-weight:700;color:#7a58b1;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+.yoobox{
+  background:rgba(255,255,255,0.9);
+  border:2px solid #a5b4ff;border-radius:14px;
+  padding:6px 10px;font-weight:700;color:#6a64c9;
+  box-shadow:0 2px 8px rgba(100,100,255,.2);
+}
+.wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:70px;}
+canvas{
+  background:#eef1ff;border-radius:16px;
+  box-shadow:0 8px 20px rgba(0,0,0,.1);
+  max-width:100%;height:auto;
+}
+#preview{
+  position:absolute;top:90px;left:50%;transform:translateX(-50%);
+  width:60px;height:60px;pointer-events:none;
+  animation:bounce 2s infinite ease-in-out;
+}
+.cute-line{
+  position:absolute;top:150px;left:50%;transform:translateX(-50%);
+  width:70%;height:10px;border-radius:10px;
+  background:repeating-linear-gradient(90deg,#ffd7ef,#ffd7ef 12px,#fff0fa 12px,#fff0fa 24px);
+  box-shadow:0 2px 6px rgba(255,200,230,.4);
+}
+.cute-line::after{
+  content:'💖';position:absolute;right:-20px;top:-14px;font-size:18px;
+  animation:heart 1.5s infinite ease-in-out;
+}
+@keyframes bounce{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,-10px);}}
+@keyframes heart{0%,100%{transform:scale(1);}50%{transform:scale(1.3);}}
+.panel{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,15,40,.5);z-index:20;
+}
+.card{
+  background:#fff;border-radius:18px;padding:24px;text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);width:min(90vw,400px);
+}
+.btn{
+  padding:12px 20px;border:none;border-radius:12px;
+  background:var(--accent);color:#fff;font-weight:700;
+  cursor:pointer;font-size:16px;margin-top:12px;
+}
+footer{
+  position:fixed;bottom:8px;right:12px;
+  color:#7a9cff;font-size:14px;font-weight:600;text-shadow:0 1px 2px rgba(255,255,255,.8);
+}
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
 </head>
 <body>
 <header>
-  <div class="brand">🎮 Jingooth Fusion</div>
-  <div class="hud">
-    <div>Score: <span id="score">0</span></div>
-    <div>Level: <span id="nextLevel">1</span></div>
-  </div>
+  <div class="scorebox">⭐ Score: <span id="score">0</span></div>
+  <div class="yoobox">💗 Yoo Jin Goo 💗</div>
 </header>
-
 <div class="wrap">
   <canvas id="game" width="420" height="720"></canvas>
-  <img id="preview" src="" alt="preview">
+  <img id="preview" src="">
   <div class="cute-line"></div>
 </div>
-
 <div id="start" class="panel">
   <div class="card">
     <h1>Smile with Yeo Jin-goo 💕</h1>
@@ -94,36 +94,31 @@
     <button class="btn" onclick="window.startGame()">Start Game</button>
   </div>
 </div>
-
 <footer>by: namaoi.sweet 💕</footer>
+
+<!-- เสียง -->
+<audio id="soundDrop" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2f5a0e7b8f.mp3?filename=pop-94319.mp3" preload="auto"></audio>
+<audio id="soundMerge" src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_00e08ad807.mp3?filename=soft-bling-1046.mp3" preload="auto"></audio>
+<audio id="soundOver" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_34563f6ef3.mp3?filename=cute-little-failure-94669.mp3" preload="auto"></audio>
 
 <script>
 (() => {
-  const IMG_COUNT = 12;
-  const IMG_PATHS = Array.from({length: IMG_COUNT}, (_,i)=>`images/face${i+1}.png`);
-  const canvas = document.getElementById('game');
-  const scoreEl = document.getElementById('score');
-  const nextEl = document.getElementById('nextLevel');
-  const preview = document.getElementById('preview');
-  let Engine, Render, World, Bodies, Events;
-  let engine, render, world;
-  let textures = [];
-  let nextLevel = 1;
-  let allowDrop = false;
-  let dropX = canvas.width/2;
-  let score = 0;
-  let gameOver = false;
-  let sensorActive = false;
+  const IMG_COUNT=12;
+  const IMG_PATHS=Array.from({length:IMG_COUNT},(_,i)=>`images/face${i+1}.png`);
+  const canvas=document.getElementById('game');
+  const scoreEl=document.getElementById('score');
+  const preview=document.getElementById('preview');
+  const sDrop=document.getElementById('soundDrop');
+  const sMerge=document.getElementById('soundMerge');
+  const sOver=document.getElementById('soundOver');
+  let Engine,Render,World,Bodies,Events;
+  let engine,render,world;
+  let textures=[],nextLevel=1,allowDrop=false,dropX=canvas.width/2,score=0,gameOver=false,sensorActive=false;
 
-  async function loadImages(paths){
-    return Promise.all(paths.map(src=>new Promise((res,rej)=>{
-      const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src;
-    })));
-  }
+  async function loadImages(paths){return Promise.all(paths.map(src=>new Promise((res,rej)=>{const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src;})));}
 
   function setupMatter(){
-    Engine=Matter.Engine;Render=Matter.Render;
-    World=Matter.World;Bodies=Matter.Bodies;Events=Matter.Events;
+    Engine=Matter.Engine;Render=Matter.Render;World=Matter.World;Bodies=Matter.Bodies;Events=Matter.Events;
     engine=Engine.create();
     render=Render.create({canvas,engine,options:{wireframes:false,background:'transparent'}});
     world=engine.world;
@@ -140,23 +135,18 @@
       for(const p of e.pairs){
         const a=p.bodyA,b=p.bodyB;
         if(a.isSensor||b.isSensor)continue;
-        if(a.custom&&b.custom&&a.custom.level===b.custom.level){
-          const rel=Math.hypot(a.velocity.x-b.velocity.x,a.velocity.y-b.velocity.y);
-          if(rel<2) merge(a,b);
+        if(a.custom&&b.custom&&a.custom.level===b.custom.level&&!a.merged&&!b.merged){
+          a.merged=b.merged=true;
+          setTimeout(()=>merge(a,b),100);
         }
       }
     });
 
-    Events.on(engine,'collisionActive',e=>{
-      if(!sensorActive) return;
+    Events.on(engine,'collisionActive',()=>{
+      if(!sensorActive)return;
       const all=Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
-      if(all.length<6) return;
-      for(const p of e.pairs){
-        const a=p.bodyA,b=p.bodyB;
-        if((a.label==='topSensor'&&b.custom)||(b.label==='topSensor'&&a.custom)){
-          endGame();
-        }
-      }
+      const highest=Math.min(...all.map(b=>b.position.y));
+      if(highest<120){endGame();}
     });
 
     Render.run(render);
@@ -166,33 +156,31 @@
   function addPiece(level,x=canvas.width/2){
     const r=18+level*7;
     const tex=textures[level-1];
-    const body=Bodies.circle(x,50,r,{
-      restitution:0.15,friction:0.001,
-      render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}
-    });
+    const body=Bodies.circle(x,80,r,{restitution:0.15,friction:0.001,
+      render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}});
     body.custom={level};
     World.add(world,body);
+    sDrop.currentTime=0;sDrop.play();
     return body;
   }
 
   function merge(a,b){
     const level=a.custom.level;
-    const nx=(a.position.x+b.position.x)/2;
-    const ny=(a.position.y+b.position.y)/2;
+    const nx=(a.position.x+b.position.x)/2,ny=(a.position.y+b.position.y)/2;
     World.remove(world,a);World.remove(world,b);
     if(level<IMG_COUNT){
       const c=addPiece(level+1,nx);
       Matter.Body.setPosition(c,{x:nx,y:ny});
       score+=level*10;
+      sMerge.currentTime=0;sMerge.play();
     }else score+=level*25;
     scoreEl.textContent=score;
   }
 
   function scheduleNextLevel(){
     const r=Math.random();
-    nextLevel = r<.6?1 : r<.85?2 : r<.95?3 : 4;
-    nextEl.textContent=nextLevel;
-    preview.src = textures[nextLevel-1].src;
+    nextLevel=r<.6?1:r<.85?2:r<.95?3:4;
+    preview.src=textures[nextLevel-1].src;
   }
 
   function dropPiece(){
@@ -204,9 +192,9 @@
   function initControls(){
     const move=e=>{
       const rect=canvas.getBoundingClientRect();
-      const clientX=e.touches?e.touches[0].clientX:e.clientX;
-      dropX=(clientX-rect.left)*(canvas.width/rect.width);
-      preview.style.left=`${rect.left + (clientX-rect.left)}px`;
+      const x=e.touches?e.touches[0].clientX:e.clientX;
+      dropX=(x-rect.left)*(canvas.width/rect.width);
+      preview.style.left=`${x}px`;
     };
     canvas.addEventListener('mousemove',move);
     canvas.addEventListener('touchmove',move,{passive:true});
@@ -216,7 +204,8 @@
 
   function endGame(){
     if(gameOver)return;
-    gameOver=true;allowDrop=false;
+    gameOver=true;allowDrop=false;sensorActive=false;
+    sOver.currentTime=0;sOver.play();
     const panel=document.getElementById('start');
     panel.style.display='flex';
     panel.querySelector('h1').innerText='Game Over 💥';
@@ -226,9 +215,8 @@
 
   async function boot(){
     textures=await loadImages(IMG_PATHS);
-    setupMatter();initControls();scheduleNextLevel();
-    allowDrop=true;
-    setTimeout(()=>sensorActive=true,2000);
+    setupMatter();initControls();scheduleNextLevel();allowDrop=true;
+    setTimeout(()=>sensorActive=true,2500);
   }
 
   window.startGame=()=>{
@@ -238,7 +226,7 @@
       for(const b of bodies){if(!b.isStatic)Matter.World.remove(engine.world,b);}
       score=0;scoreEl.textContent='0';gameOver=false;sensorActive=false;
       scheduleNextLevel();allowDrop=true;
-      setTimeout(()=>sensorActive=true,2000);
+      setTimeout(()=>sensorActive=true,2500);
       return;
     }
     boot();

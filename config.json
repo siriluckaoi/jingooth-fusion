@@ -1,0 +1,19 @@
+{
+  "projectName": "jingooth",
+  "imageSize": "512x512",
+  "levels": [
+    "images/face1.png",
+    "images/face2.png",
+    "images/face3.png",
+    "images/face4.png",
+    "images/face5.png",
+    "images/face6.png",
+    "images/face7.png",
+    "images/face8.png",
+    "images/face9.png",
+    "images/face10.png",
+    "images/face11.png",
+    "images/face12.png"
+  ],
+  "notes": "Replace these 12 PNGs with your actual face images. Keep the same filenames or update this list where your target project expects it."
+}

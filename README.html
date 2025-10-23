@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>README — jingooth</title>
+  <style>
+    body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans Thai',sans-serif;line-height:1.6;margin:24px;max-width:920px}
+    code{background:#f5f7ff;padding:2px 6px;border-radius:6px}
+    pre{background:#0b1021;color:#eaeefc;padding:16px;border-radius:10px;overflow:auto}
+    h1{margin-top:0}
+    ol,ul{padding-left:22px}
+  </style>
+</head>
+<body>
+<h1>Jingooth — Asset Pack 12 เลเวล (512×512)</h1>
+<p>แพ็กนี้เป็น <b>ชุดภาพ + โครง</b> สำหรับใช้กับเกมสไตล์ Suika โดยไม่ต้องแก้โค้ด — เปลี่ยนไฟล์ภาพแล้ว Deploy ได้เลย</p>
+
+<h2>ไฟล์ในแพ็ก</h2>
+<ul>
+  <li><code>/images/face1.png ... face12.png</code> — ตัวอย่างภาพวงกลมสี (โปร่งใส 512×512)</li>
+  <li><code>config.json</code> — ระบุลำดับ 12 เลเวล</li>
+  <li><code>index.html</code> — หน้า Preview/สตาร์ท</li>
+</ul>
+
+<h2>วิธีใช้งานแบบ “ไม่ต้องโค้ด”</h2>
+<ol>
+  <li>เตรียมรูปหน้าคน <b>12 ไฟล์ PNG โปร่งใส 512×512</b> ตั้งชื่อ <code>face1.png</code> ถึง <code>face12.png</code></li>
+  <li><b>ทางเลือก A (รวดเร็ว):</b> ใช้โปรเจกต์แม่แบบ (เช่นคลัง Suika บน GitHub)
+    <ol>
+      <li>Fork โปรเจกต์แม่แบบ (เช่น <i>daxigua</i> หรือคลัง Suika ใดๆ)</li>
+      <li>แทนที่โฟลเดอร์ภาพของโปรเจกต์นั้นด้วย <code>/images</code> จากแพ็กนี้</li>
+      <li>ถ้ามีไฟล์คอนฟิกของโปรเจกต์ ให้ตรวจว่าลำดับรูป 1→12 ตรงชื่อไฟล์</li>
+      <li>Push ขึ้น GitHub</li>
+      <li>ไปที่ <a href="https://vercel.com" target="_blank" rel="noopener">Vercel</a> → <b>New Project</b> → Import จาก GitHub → <b>Deploy</b></li>
+    </ol>
+  </li>
+  <li><b>ทางเลือก B (ใช้แพ็กนี้เป็น Static Site แสดงตัวอย่าง):</b>
+    <ol>
+      <li>อัปโหลดโฟลเดอร์นี้ขึ้น GitHub เป็น repo ชื่อ <b>jingooth</b></li>
+      <li>บน Vercel → Import โปรเจกต์ <b>jingooth</b> → <b>Deploy</b></li>
+      <li>หน้านี้จะเป็น Preview ของภาพ 12 เลเวล (ไม่ใช่เอ็นจิ้นเกม) — ใช้เพื่อทดสอบ/รีวิวรูปได้</li>
+    </ol>
+  </li>
+</ol>
+
+<h2>เคล็ดลับคุณภาพ</h2>
+<ul>
+  <li>เว้นขอบรอบรูป 5–8% เพื่อลดการชนขอบ/ทับกัน</li>
+  <li>ให้รูปอยู่ในทรงกลม/โค้งมน เพื่อให้ hitbox ในเกมลื่นขึ้น</li>
+  <li>ใช้โทนสี/สไตล์ใกล้กันทั้ง 12 เลเวล</li>
+</ul>
+
+<h2>การเปลี่ยนชื่อแสดงผล</h2>
+<p>แก้ไขชื่อบนหน้าเว็บใน <code>index.html</code> ได้ตามต้องการ หรือใช้ค่า <code>projectName</code> ใน <code>config.json</code>.</p>
+
+</body></html>

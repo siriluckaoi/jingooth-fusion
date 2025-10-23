@@ -15,11 +15,17 @@ html,body{
   position:relative;width:100%;height:100%;
   display:flex;justify-content:center;align-items:center;
 }
-canvas{
+canvas.main {
   aspect-ratio:420/648;
   width:100%;max-width:480px;height:auto;
   background:#eef1ff;border-radius:20px;
   box-shadow:0 6px 14px rgba(0,0,0,.2);
+}
+canvas.fx {
+  position:absolute;inset:0;margin:auto;
+  width:100%;max-width:480px;height:auto;
+  aspect-ratio:420/648;
+  pointer-events:none; /* รับแสงวิบวับอย่างเดียว */
 }
 .scorebox{
   position:absolute;top:3%;left:50%;transform:translateX(-50%);
@@ -68,7 +74,11 @@ footer{
 </head>
 <body>
 <div id="gameContainer">
-  <canvas id="game" width="420" height="648"></canvas>
+  <!-- main canvas (ฟิสิกส์/ภาพเกม) -->
+  <canvas id="game" class="main" width="420" height="648"></canvas>
+  <!-- overlay canvas สำหรับเอฟเฟกต์ sparkle -->
+  <canvas id="fx" class="fx" width="420" height="648"></canvas>
+
   <div class="cute-line"></div>
   <img id="preview" src="">
   <div class="scorebox">⭐ <span id="score">0</span></div>
@@ -86,18 +96,23 @@ footer{
 <footer>by: namaoi.sweet 💕</footer>
 
 <script>
+/* =========================
+   Config & Globals
+========================= */
 const IMG_COUNT=12;
 const IMG_PATHS=Array.from({length:IMG_COUNT},(_,i)=>`images/face${i+1}.png`);
 let Engine,Render,World,Bodies,Events,engine,world,textures=[];
 let allowDrop=false,dropX=210,score=0,nextLevel=1,gameOver=false,lastDrop=0;
-const SAFE_LINE_Y=130,BUFFER=30;
-const canvas=document.getElementById('game'),
-scoreEl=document.getElementById('score'),
-preview=document.getElementById('preview'),
-panel=document.getElementById('panel'),
-btnStart=document.getElementById('btnStart'),
-btnBack=document.getElementById('btnBack');
+const canvas=document.getElementById('game');
+const fxCanvas=document.getElementById('fx');
+const fxCtx=fxCanvas.getContext('2d');
+const scoreEl=document.getElementById('score');
+const preview=document.getElementById('preview');
+const panel=document.getElementById('panel');
+const btnStart=document.getElementById('btnStart');
+const btnBack=document.getElementById('btnBack');
 
+/* ======== Audio (AudioContext) ======== */
 let audioCtx=null,audioBuffers={},bgmSource=null;
 const sounds={
   drop:"https://cdn.pixabay.com/download/audio/2022/03/15/audio_2f5a0e7b8f.mp3?filename=pop-94319.mp3",
@@ -105,54 +120,42 @@ const sounds={
   over:"https://cdn.pixabay.com/download/audio/2022/03/15/audio_34563f6ef3.mp3?filename=cute-little-failure-94669.mp3",
   bgm:"https://cdn.pixabay.com/download/audio/2022/03/09/audio_bf188c76da.mp3?filename=happy-day-11157.mp3"
 };
-
-async function loadSound(url){
-  const res=await fetch(url);
-  const buf=await res.arrayBuffer();
-  return await audioCtx.decodeAudioData(buf);
-}
-
 async function initAudio(){
   if(audioCtx) return;
   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  for(const [k,v] of Object.entries(sounds)){audioBuffers[k]=await loadSound(v);}
+  for(const [key,url] of Object.entries(sounds)){
+    const res=await fetch(url,{cache:'force-cache'});
+    const buf=await res.arrayBuffer();
+    audioBuffers[key]=await audioCtx.decodeAudioData(buf);
+  }
 }
-
 function playSound(name,loop=false,vol=1){
   if(!audioCtx||!audioBuffers[name])return;
   const src=audioCtx.createBufferSource();
   const gain=audioCtx.createGain();
   gain.gain.value=vol;
-  src.buffer=audioBuffers[name];
-  src.loop=loop;
+  src.buffer=audioBuffers[name]; src.loop=loop;
   src.connect(gain).connect(audioCtx.destination);
   src.start(0);
-  if(name==="bgm")bgmSource=src;
+  if(name==='bgm') bgmSource=src;
   return src;
 }
+function stopBGM(){ if(bgmSource){try{bgmSource.stop();}catch{} bgmSource=null;} }
 
-function stopBGM(){
-  if(bgmSource){try{bgmSource.stop();}catch{}bgmSource=null;}
-}
-
-async function unlockAudio(){
-  if(audioCtx)return;
-  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  await initAudio();
-  playSound("drop",false,0); // warm up
-}
-
+/* ======== Images ======== */
 async function loadImages(){
   return Promise.all(IMG_PATHS.map(src=>new Promise((res,rej)=>{
-    const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src;
+    const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=src;
   })));
 }
 
+/* ======== Matter.js ======== */
 function setupMatter(){
-  Engine=Matter.Engine;Render=Matter.Render;World=Matter.World;Bodies=Matter.Bodies;Events=Matter.Events;
+  Engine=Matter.Engine; Render=Matter.Render; World=Matter.World; Bodies=Matter.Bodies; Events=Matter.Events;
   engine=Engine.create();
   const render=Render.create({canvas,engine,options:{width:420,height:648,wireframes:false,background:'transparent'}});
   world=engine.world;
+  // floor + walls
   World.add(world,[
     Bodies.rectangle(210,660,420,40,{isStatic:true}),
     Bodies.rectangle(-20,324,40,648,{isStatic:true}),
@@ -160,11 +163,14 @@ function setupMatter(){
   ]);
   Matter.Runner.run(Matter.Runner.create(),engine);
   Render.run(render);
+
+  // merge detection
   Events.on(engine,'collisionStart',e=>{
     for(const p of e.pairs){
       const a=p.bodyA,b=p.bodyB;
       if(a.custom&&b.custom&&a.custom.level===b.custom.level&&!a.merged&&!b.merged){
-        a.merged=b.merged=true;setTimeout(()=>merge(a,b),100);
+        a.merged=b.merged=true;
+        setTimeout(()=>merge(a,b),100);
       }
     }
   });
@@ -172,91 +178,150 @@ function setupMatter(){
 
 function addPiece(level,x=210){
   const r=18+level*6,tex=textures[level-1];
-  const body=Matter.Bodies.circle(x,80,r,{restitution:0.15,friction:0.001,
-    render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}});
+  const body=Bodies.circle(x,90,r,{
+    restitution:0.15,friction:0.001,
+    render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}
+  });
   body.custom={level};
-  Matter.World.add(world,body);
-  playSound("drop",false,0.4);
+  World.add(world,body);
+  playSound('drop',false,0.45);
   return body;
 }
 
 function merge(a,b){
   const lvl=a.custom.level;
-  const nx=(a.position.x+b.position.x)/2,ny=(a.position.y+b.position.y)/2;
-  Matter.World.remove(world,a);Matter.World.remove(world,b);
+  const nx=(a.position.x+b.position.x)/2, ny=(a.position.y+b.position.y)/2;
+  World.remove(world,a); World.remove(world,b);
+
+  // sparkle effect at (nx, ny)
+  sparkle(nx, ny);
+
   if(lvl<IMG_COUNT){
     const c=addPiece(lvl+1,nx);
     Matter.Body.setPosition(c,{x:nx,y:ny});
-    score+=lvl*10;playSound("merge",false,0.5);
-  }else score+=lvl*25;
+    score+=lvl*10; playSound('merge',false,0.55);
+  } else {
+    score+=lvl*25;
+  }
   scoreEl.textContent=score;
-  scoreEl.classList.add("pulse");
-  setTimeout(()=>scoreEl.classList.remove("pulse"),300);
+  scoreEl.classList.add('pulse');
+  setTimeout(()=>scoreEl.classList.remove('pulse'),300);
+
   checkGameOver();
 }
 
 function scheduleNextLevel(){
-  const r=Math.random();nextLevel=r<.6?1:r<.85?2:r<.95?3:4;
-  preview.src=textures[nextLevel-1].src;
+  const r=Math.random();
+  nextLevel = r<.6?1 : r<.85?2 : r<.95?3 : 4;
+  preview.src = textures[nextLevel-1].src;
 }
 
 function dropPiece(){
   const now=Date.now();
-  if(!allowDrop||gameOver||now-lastDrop<400)return;
+  if(!allowDrop||gameOver||now-lastDrop<420) return;
   lastDrop=now;
-  addPiece(nextLevel,Math.max(30,Math.min(390,dropX)));
+  addPiece(nextLevel, Math.max(30, Math.min(390, dropX)));
   scheduleNextLevel();
 }
 
 function checkGameOver(){
-  const all=Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
-  if(all.length<15)return;
-  const topPieces=all.filter(b=>b.position.y<160);
-  if(topPieces.length>5){endGame();}
+  // เงื่อนไขอ่อนลง: ต้องมีชิ้นจำนวนมากและสูงจริง ๆ
+  const all = Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
+  if(all.length<15) return;
+  const nearTop = all.filter(b => (b.position.y - (b.circleRadius||0)) < 120);
+  if(nearTop.length > 6) endGame();
 }
 
+/* ======== Controls ======== */
 function initControls(){
   const move=e=>{
     const rect=canvas.getBoundingClientRect();
-    const clientX=e.touches?e.touches[0].clientX:e.clientX;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const x=(clientX-rect.left)*(420/rect.width);
-    dropX=Math.max(30,Math.min(390,x));
-    preview.style.left=`${clientX}px`;
+    dropX = Math.max(30, Math.min(390, x));
+    // move preview DOM to finger (screen coords)
+    preview.style.left = `${clientX}px`;
   };
   canvas.addEventListener('mousemove',move);
   canvas.addEventListener('touchmove',move,{passive:true});
-  canvas.addEventListener('click',()=>dropPiece());
-  canvas.addEventListener('touchend',()=>dropPiece(),{passive:true});
+  const dropOnce=()=>dropPiece();
+  canvas.addEventListener('click',dropOnce);
+  canvas.addEventListener('touchend',dropOnce,{passive:true});
 }
 
-function endGame(){
-  if(gameOver)return;
-  gameOver=true;allowDrop=false;
-  stopBGM();playSound("over",false,0.7);
-  panel.style.display='flex';
-  panel.querySelector('h1').innerText='Game Over 💥';
-  panel.querySelector('p').innerText='Thanks for smiling with Yeo Jin Goo 🌸';
-  btnStart.textContent='🔄 Play Again';btnBack.style.display='inline-block';
+/* =========================
+   Sparkle FX (overlay canvas)
+========================= */
+const fxParticles=[];
+function sparkle(x,y){
+  // สร้างอนุภาค 16 ชิ้น กระจายออกจากจุดรวม
+  for(let i=0;i<16;i++){
+    const ang = (Math.PI*2*i)/16 + Math.random()*0.3;
+    const spd = 2 + Math.random()*2.5;
+    fxParticles.push({
+      x, y, vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd,
+      r: 2.2 + Math.random()*1.8, life: 38 + Math.random()*12
+    });
+  }
 }
 
+function renderFX(){
+  fxCtx.clearRect(0,0,fxCanvas.width,fxCanvas.height);
+  for(let i=fxParticles.length-1;i>=0;i--){
+    const p=fxParticles[i];
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; // gravity เบาๆ
+    p.life--;
+    const alpha = Math.max(0, p.life/50);
+    fxCtx.beginPath();
+    fxCtx.fillStyle = `rgba(255,200,240,${alpha})`;
+    fxCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    fxCtx.fill();
+    // ไฮไลท์ขาว
+    fxCtx.beginPath();
+    fxCtx.fillStyle = `rgba(255,255,255,${alpha})`;
+    fxCtx.arc(p.x-p.r*0.3,p.y-p.r*0.3,p.r*0.5,0,Math.PI*2);
+    fxCtx.fill();
+    if(p.life<=0) fxParticles.splice(i,1);
+  }
+  requestAnimationFrame(renderFX);
+}
+requestAnimationFrame(renderFX);
+
+/* =========================
+   Boot
+========================= */
 async function boot(){
-  textures=await loadImages();
-  setupMatter();initControls();scheduleNextLevel();allowDrop=true;
+  textures = await loadImages();
+  setupMatter(); initControls(); scheduleNextLevel(); allowDrop=true;
 }
 
-btnStart.addEventListener('click',async ()=>{
-  await unlockAudio();await initAudio();
+btnStart.addEventListener('click', async ()=>{
+  // ปลดล็อกเสียง: ต้องมาจาก user gesture เสมอ
+  if(!audioCtx){ await initAudio(); }
+  // เริ่มเพลง bgm เบาๆ
+  playSound('bgm', true, 0.22);
+
   panel.style.display='none';
-  stopBGM();playSound("bgm",true,0.2);
   if(engine){
     const bodies=Matter.Composite.allBodies(engine.world);
-    for(const b of bodies){if(!b.isStatic)Matter.World.remove(world,b);}
-    score=0;scoreEl.textContent='0';gameOver=false;
-    scheduleNextLevel();allowDrop=true;btnBack.style.display='none';
+    for(const b of bodies){ if(!b.isStatic) Matter.World.remove(world,b); }
+    score=0; scoreEl.textContent='0'; gameOver=false;
+    scheduleNextLevel(); allowDrop=true; btnBack.style.display='none';
     return;
   }
   boot();
 });
+
+function endGame(){
+  if(gameOver) return;
+  gameOver=true; allowDrop=false;
+  stopBGM(); playSound('over', false, 0.7);
+  panel.style.display='flex';
+  panel.querySelector('h1').innerText='Game Over 💥';
+  panel.querySelector('p').innerText='Thanks for smiling with Yeo Jin Goo 🌸';
+  btnStart.textContent='🔄 Play Again';
+  btnBack.style.display='inline-block';
+}
 </script>
 </body>
 </html>

@@ -2,88 +2,94 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>Jingooth Fusion Game 💕</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
-:root{
-  --accent:#8aa7ff;--bg1:#fde2f3;--bg2:#d8dcff;--score:#ff5b8a;
+:root {
+  --accent:#8aa7ff;
+  --bg1:#fde2f3;
+  --bg2:#d8dcff;
+  --score:#ff4f8a;
 }
-body{margin:0;font-family:'Fredoka One',sans-serif;
-background:linear-gradient(180deg,var(--bg1),var(--bg2));overflow:hidden;touch-action:none;}
-header{
-  position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;
-  align-items:center;padding:10px 16px;z-index:10;
+html,body {
+  margin:0; padding:0;
+  width:100%; height:100%;
+  overflow:hidden;
+  font-family:'Fredoka One',sans-serif;
+  background:linear-gradient(180deg,var(--bg1),var(--bg2));
+  touch-action:none;
 }
-.scorebox{
-  background:#fff8fb;border:3px solid var(--score);border-radius:20px;padding:8px 18px;
-  color:var(--score);font-size:26px;font-weight:900;text-shadow:1px 1px 0 #fff;
-  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+#game {
+  display:block;
+  width:100vw;
+  height:100vh;
+  touch-action:none;
 }
-.yoobox{
-  background:#ffffffb3;border:2px solid #a8b2ff;border-radius:14px;padding:6px 14px;
-  font-weight:700;color:#6a64c9;box-shadow:0 2px 8px rgba(100,100,255,.2);
+#preview {
+  position:absolute;top:14%;left:50%;transform:translateX(-50%);
+  width:70px;height:70px;pointer-events:none;animation:bounce 2s infinite ease-in-out;
 }
-canvas{
-  background:#eef1ff;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,.1);
-  max-width:100%;height:auto;display:block;margin:90px auto 0;
-}
-#preview{
-  position:absolute;top:90px;left:50%;transform:translateX(-50%);
-  width:60px;height:60px;pointer-events:none;animation:bounce 2s infinite ease-in-out;
-}
-.cute-line{
-  position:absolute;top:150px;left:50%;transform:translateX(-50%);
-  width:70%;height:8px;border-radius:10px;
+.cute-line {
+  position:absolute;top:18%;left:50%;transform:translateX(-50%);
+  width:80%;height:8px;border-radius:10px;
   background:repeating-linear-gradient(90deg,#ffd7ef,#ffd7ef 12px,#fff0fa 12px,#fff0fa 24px);
   box-shadow:0 2px 6px rgba(255,200,230,.4);
 }
-.panel{
+@keyframes bounce {0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,-10px);}}
+.panel {
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,0.45);z-index:20;
+  background:rgba(0,0,0,0.4);z-index:10;text-align:center;
 }
-.card{
-  background:#fff;border-radius:20px;padding:26px;text-align:center;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);width:min(90vw,400px);
+.card {
+  background:#fff;border-radius:20px;padding:24px 20px;width:85%;max-width:380px;
+  box-shadow:0 10px 25px rgba(0,0,0,.25);
 }
-.card h1{
-  color:var(--score);margin-bottom:8px;font-size:22px;white-space:nowrap;
+.card h1 {
+  font-size:22px;white-space:nowrap;margin-bottom:10px;color:#ff5b8a;
 }
-.card p{color:#555;margin-bottom:8px;}
-.btn{
-  padding:12px 20px;border:none;border-radius:12px;margin:6px;
-  background:var(--accent);color:#fff;font-weight:700;font-size:16px;cursor:pointer;
+.card p {
+  font-size:14px;color:#555;margin-bottom:12px;
 }
-.btn.secondary{
+.btn {
+  border:none;border-radius:12px;padding:12px 18px;margin:6px;
+  font-weight:700;font-size:16px;color:#fff;cursor:pointer;
+}
+.btn.primary {
+  background:var(--accent);
+}
+.btn.secondary {
   background:linear-gradient(145deg,#ffa8d8,#ffbde5);
   border:2px solid #ff87ca;
+  color:#fff;
 }
-.btn:hover{transform:scale(1.06);}
-footer{
-  position:fixed;bottom:8px;right:12px;color:#7a9cff;font-size:14px;
-  font-weight:600;text-shadow:0 1px 2px rgba(255,255,255,.8);
+footer {
+  position:fixed;bottom:8px;right:10px;
+  color:#7a9cff;font-size:13px;font-weight:600;
+  text-shadow:0 1px 2px rgba(255,255,255,.8);
 }
-.pulse{animation:scorePulse .4s ease-in-out;}
-@keyframes scorePulse{0%{transform:scale(1);}50%{transform:scale(1.25);}100%{transform:scale(1);}}
-@keyframes bounce{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,-10px);}}
+.scorebox {
+  position:fixed;top:8px;left:50%;transform:translateX(-50%);
+  background:#ffffffb8;border:3px solid var(--score);border-radius:20px;
+  padding:6px 16px;font-size:24px;font-weight:900;color:var(--score);
+  text-shadow:1px 1px 0 #fff;box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+.pulse {animation:scorePulse .3s ease-in-out;}
+@keyframes scorePulse {0%{transform:scale(1);}50%{transform:scale(1.25);}100%{transform:scale(1);}}
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
 </head>
 <body>
-<header>
-  <div class="scorebox">⭐ <span id="score">0</span></div>
-  <div class="yoobox">💗 Yoo Jin Goo 💗</div>
-</header>
-
-<canvas id="game" width="420" height="720"></canvas>
+<div class="scorebox">⭐ <span id="score">0</span></div>
+<canvas id="game"></canvas>
 <img id="preview" src="">
 <div class="cute-line"></div>
 
-<div id="start" class="panel">
+<div id="panel" class="panel">
   <div class="card">
     <h1>Smile with Yeo Jin-goo 💕</h1>
     <p>Tap to drop and merge the smiling faces!</p>
-    <button class="btn" id="btnStart" onclick="window.startGame()">Start Game</button>
+    <button class="btn primary" id="btnStart" onclick="startGame()">Start Game</button>
     <button class="btn secondary" id="btnBack" style="display:none;" onclick="window.location.href='index.html'">🏠 Back to Main</button>
   </div>
 </div>
@@ -95,121 +101,151 @@ footer{
 <audio id="soundOver" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_34563f6ef3.mp3?filename=cute-little-failure-94669.mp3" preload="auto"></audio>
 
 <script>
-(() => {
-  const IMG_COUNT=12, SAFE_LINE_Y=90, BUFFER=60;
-  const IMG_PATHS=Array.from({length:IMG_COUNT},(_,i)=>`images/face${i+1}.png`);
-  const canvas=document.getElementById('game'),scoreEl=document.getElementById('score'),
-        preview=document.getElementById('preview'),btnStart=document.getElementById('btnStart'),
-        btnBack=document.getElementById('btnBack'),
-        sDrop=document.getElementById('soundDrop'),
-        sMerge=document.getElementById('soundMerge'),
-        sOver=document.getElementById('soundOver');
-  let Engine,Render,World,Bodies,Events,engine,render,world;
-  let textures=[],nextLevel=1,allowDrop=false,dropX=canvas.width/2,score=0,gameOver=false,lastDrop=0;
+const IMG_COUNT=12;
+const IMG_PATHS=Array.from({length:IMG_COUNT},(_,i)=>`images/face${i+1}.png`);
+let Engine,Render,World,Bodies,Events,engine,world,textures=[];
+let allowDrop=false,dropX=0,score=0,nextLevel=1,gameOver=false,lastDrop=0;
+const SAFE_LINE_Y=window.innerHeight*0.18; // เส้นหัวใจ
+const BUFFER=80;
+const canvas=document.getElementById('game');
+const scoreEl=document.getElementById('score');
+const preview=document.getElementById('preview');
+const panel=document.getElementById('panel');
+const btnStart=document.getElementById('btnStart');
+const btnBack=document.getElementById('btnBack');
+const sDrop=document.getElementById('soundDrop');
+const sMerge=document.getElementById('soundMerge');
+const sOver=document.getElementById('soundOver');
+let audioUnlocked=false;
 
-  async function loadImages(paths){return Promise.all(paths.map(src=>new Promise((res,rej)=>{const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src;})));}
+function unlockAudio(){
+  if(audioUnlocked)return;
+  [sDrop,sMerge,sOver].forEach(a=>{
+    a.play().then(()=>{a.pause();a.currentTime=0;});
+  });
+  audioUnlocked=true;
+}
 
-  function setupMatter(){
-    Engine=Matter.Engine;Render=Matter.Render;World=Matter.World;Bodies=Matter.Bodies;Events=Matter.Events;
-    engine=Engine.create();
-    render=Render.create({canvas,engine,options:{wireframes:false,background:'transparent'}});
-    world=engine.world;
-    const w=canvas.width,h=canvas.height,t=40;
-    World.add(world,[
-      Bodies.rectangle(w/2,h+t/2,w,t,{isStatic:true}),
-      Bodies.rectangle(-t/2,h/2,t,h,{isStatic:true}),
-      Bodies.rectangle(w+t/2,h/2,t,h,{isStatic:true})
-    ]);
-    Matter.Runner.run(Matter.Runner.create(),engine);Render.run(render);
+async function loadImages(){
+  return Promise.all(IMG_PATHS.map(src=>new Promise((res,rej)=>{
+    const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src;
+  })));
+}
 
-    Events.on(engine,'collisionStart',e=>{
-      for(const p of e.pairs){
-        const a=p.bodyA,b=p.bodyB;
-        if(a.custom&&b.custom&&a.custom.level===b.custom.level&&!a.merged&&!b.merged){
-          a.merged=b.merged=true;setTimeout(()=>merge(a,b),80);
-        }
+function setupMatter(){
+  Engine=Matter.Engine;Render=Matter.Render;World=Matter.World;Bodies=Matter.Bodies;Events=Matter.Events;
+  engine=Engine.create();
+  const w=window.innerWidth,h=window.innerHeight;
+  const render=Matter.Render.create({
+    canvas,engine,
+    options:{width:w,height:h,wireframes:false,background:'transparent'}
+  });
+  world=engine.world;
+  World.add(world,[
+    Bodies.rectangle(w/2,h+20,w,40,{isStatic:true}),
+    Bodies.rectangle(-20,h/2,40,h,{isStatic:true}),
+    Bodies.rectangle(w+20,h/2,40,h,{isStatic:true})
+  ]);
+  Matter.Runner.run(Matter.Runner.create(),engine);
+  Render.run(render);
+
+  Events.on(engine,'collisionStart',e=>{
+    for(const p of e.pairs){
+      const a=p.bodyA,b=p.bodyB;
+      if(a.custom&&b.custom&&a.custom.level===b.custom.level&&!a.merged&&!b.merged){
+        a.merged=b.merged=true;setTimeout(()=>merge(a,b),100);
       }
-    });
-  }
-
-  function addPiece(level,x=canvas.width/2){
-    const r=18+level*7,tex=textures[level-1];
-    const body=Matter.Bodies.circle(x,60,r,{restitution:0.15,friction:0.001,
-      render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}});
-    body.custom={level};Matter.World.add(world,body);
-    try{sDrop.currentTime=0;sDrop.play();}catch{}return body;
-  }
-
-  function merge(a,b){
-    const level=a.custom.level,nx=(a.position.x+b.position.x)/2,ny=(a.position.y+b.position.y)/2;
-    Matter.World.remove(world,a);Matter.World.remove(world,b);
-    if(level<IMG_COUNT){const c=addPiece(level+1,nx);Matter.Body.setPosition(c,{x:nx,y:ny});
-      score+=level*10;try{sMerge.currentTime=0;sMerge.play();}catch{}}else score+=level*25;
-    scoreEl.textContent=score;scoreEl.classList.add("pulse");
-    setTimeout(()=>scoreEl.classList.remove("pulse"),400);
-    checkGameOver();
-  }
-
-  function scheduleNextLevel(){
-    const r=Math.random();nextLevel=r<.6?1:r<.85?2:r<.95?3:4;
-    preview.src=textures[nextLevel-1].src;
-  }
-
-  function dropPiece(){
-    const now=Date.now();if(!allowDrop||gameOver||now-lastDrop<600)return;
-    lastDrop=now;
-    addPiece(nextLevel,Math.max(30,Math.min(canvas.width-30,dropX)));
-    scheduleNextLevel();
-  }
-
-  function checkGameOver(){
-    const all=Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
-    if(all.length<6)return;
-    const topMost=Math.min(...all.map(b=>b.position.y-(b.circleRadius||0)));
-    if(topMost<SAFE_LINE_Y-BUFFER){endGame();}
-  }
-
-  function initControls(){
-    const move=e=>{
-      const rect=canvas.getBoundingClientRect();
-      const clientX=e.touches?e.touches[0].clientX:e.clientX;
-      dropX=(clientX-rect.left)*(canvas.width/rect.width);
-      preview.style.left=`${clientX}px`;
-    };
-    canvas.addEventListener('mousemove',move);
-    canvas.addEventListener('touchmove',move,{passive:true});
-    canvas.addEventListener('click',()=>dropPiece());
-    canvas.addEventListener('touchend',()=>dropPiece(),{passive:true});
-  }
-
-  function endGame(){
-    if(gameOver)return;gameOver=true;allowDrop=false;
-    try{sOver.currentTime=0;sOver.play();}catch{}
-    const panel=document.getElementById('start');
-    panel.style.display='flex';
-    panel.querySelector('h1').innerText='Game Over 💥';
-    panel.querySelector('h1').style.color='#fff';
-    panel.querySelector('h1').style.textShadow='2px 2px 6px #000';
-    panel.querySelector('p').innerText='Thanks for smiling with Yeo Jin Goo 🌸';
-    btnStart.textContent='🔄 Play Again';btnBack.style.display='inline-block';
-  }
-
-  async function boot(){
-    textures=await loadImages(IMG_PATHS);
-    setupMatter();initControls();scheduleNextLevel();allowDrop=true;
-  }
-
-  window.startGame=()=>{
-    document.getElementById('start').style.display='none';
-    if(engine){
-      const bodies=Matter.Composite.allBodies(engine.world);
-      for(const b of bodies){if(!b.isStatic)Matter.World.remove(world,b);}
-      score=0;scoreEl.textContent='0';gameOver=false;
-      scheduleNextLevel();allowDrop=true;btnBack.style.display='none';return;
     }
-    boot();
+  });
+}
+
+function addPiece(level,x){
+  const w=window.innerWidth;
+  const r=20+level*6,tex=textures[level-1];
+  const body=Matter.Bodies.circle(x,80,r,{
+    restitution:0.2,friction:0.001,
+    render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}
+  });
+  body.custom={level};
+  Matter.World.add(world,body);
+  sDrop.currentTime=0;sDrop.play();
+  return body;
+}
+
+function merge(a,b){
+  const lvl=a.custom.level;
+  const nx=(a.position.x+b.position.x)/2,ny=(a.position.y+b.position.y)/2;
+  Matter.World.remove(world,a);Matter.World.remove(world,b);
+  if(lvl<IMG_COUNT){
+    const c=addPiece(lvl+1,nx);
+    Matter.Body.setPosition(c,{x:nx,y:ny});
+    score+=lvl*10;sMerge.currentTime=0;sMerge.play();
+  }else score+=lvl*25;
+  scoreEl.textContent=score;
+  scoreEl.classList.add("pulse");setTimeout(()=>scoreEl.classList.remove("pulse"),300);
+  checkGameOver();
+}
+
+function checkGameOver(){
+  const all=Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
+  if(all.length<6)return;
+  const top=Math.min(...all.map(b=>b.position.y-(b.circleRadius||0)));
+  if(top<SAFE_LINE_Y-BUFFER)endGame();
+}
+
+function scheduleNextLevel(){
+  const r=Math.random();nextLevel=r<.6?1:r<.85?2:r<.95?3:4;
+  preview.src=textures[nextLevel-1].src;
+}
+
+function dropPiece(){
+  const now=Date.now();
+  if(!allowDrop||gameOver||now-lastDrop<500)return;
+  lastDrop=now;
+  addPiece(nextLevel,Math.max(40,Math.min(window.innerWidth-40,dropX)));
+  scheduleNextLevel();
+}
+
+function initControls(){
+  const move=e=>{
+    const rect=canvas.getBoundingClientRect();
+    const clientX=e.touches?e.touches[0].clientX:e.clientX;
+    dropX=(clientX-rect.left)*(canvas.width/rect.width);
+    preview.style.left=`${clientX}px`;
   };
-})();
+  canvas.addEventListener('mousemove',move);
+  canvas.addEventListener('touchmove',move,{passive:true});
+  const dropOnce=()=>dropPiece();
+  canvas.addEventListener('click',dropOnce);
+  canvas.addEventListener('touchend',dropOnce,{passive:true});
+}
+
+function endGame(){
+  if(gameOver)return;gameOver=true;allowDrop=false;
+  sOver.currentTime=0;sOver.play();
+  panel.style.display='flex';
+  panel.querySelector('h1').innerText='Game Over 💥';
+  panel.querySelector('p').innerText='Thanks for smiling with Yeo Jin Goo 🌸';
+  btnStart.textContent='🔄 Play Again';btnBack.style.display='inline-block';
+}
+
+async function boot(){
+  textures=await loadImages();
+  setupMatter();initControls();scheduleNextLevel();allowDrop=true;
+}
+
+window.startGame=()=>{
+  unlockAudio();
+  panel.style.display='none';
+  if(engine){
+    const bodies=Matter.Composite.allBodies(engine.world);
+    for(const b of bodies){if(!b.isStatic)Matter.World.remove(world,b);}
+    score=0;scoreEl.textContent='0';gameOver=false;
+    scheduleNextLevel();allowDrop=true;btnBack.style.display='none';
+    return;
+  }
+  boot();
+};
 </script>
 </body>
 </html>

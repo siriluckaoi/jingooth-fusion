@@ -10,9 +10,9 @@
     --bg1:#fde2f3; --bg2:#d8dcff; --score:#ff4f8a; --accent:#8aa7ff;
   }
   html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:linear-gradient(180deg,var(--bg1),var(--bg2));font-family:'Fredoka One',system-ui,sans-serif;touch-action:none;}
-  /* เลย์เอาต์สไตล์ Suika: canvas คงอัตราส่วน 420x700 แล้วขยายเต็มจอแนวตั้ง */
+  /* เลย์เอาต์สไตล์ Suika: canvas คงอัตราส่วน 420x740 แล้วขยายเต็มจอแนวตั้ง */
   #stageWrap{position:relative; width:100vw; height:100vh; display:flex; align-items:center; justify-content:center;}
-  #game{display:block; width:100vw; height:100vh; aspect-ratio:420/700; max-height:100vh; background:#eef1ff; border-radius:20px; box-shadow:0 8px 22px rgba(0,0,0,.2);}
+  #game{display:block; width:100vw; height:100vh; aspect-ratio:420/740; max-height:100vh; background:#eef1ff; border-radius:20px; box-shadow:0 8px 22px rgba(0,0,0,.2);}
   /* เส้นบน (ขอบบนพื้นที่เล่น) */
   .top-line{position:absolute; width:78vw; max-width:330px; height:8px; border-radius:10px;
     background:repeating-linear-gradient(90deg,#ffd7ef,#ffd7ef 12px,#fff0fa 12px,#fff0fa 24px);
@@ -40,7 +40,7 @@
 </head>
 <body>
 <div id="stageWrap">
-  <canvas id="game" width="420" height="700"></canvas>
+  <canvas id="game" width="420" height="740"></canvas>
   <img id="preview" src="" alt="">
   <div class="top-line"></div>
   <div class="score">⭐ <span id="score">0</span></div>
@@ -65,7 +65,7 @@
 <script>
 (() => {
   // ====== CONFIG (สไตล์ Suika) ======
-  const W = 420, H = 700;               // world ขนาดคงที่
+  const W = 420, H = 740;               // world ขนาดคงที่
   const PLAY_W = 360, WALL = (W - PLAY_W)/2; // กรอบเล่นกว้าง 360px อยู่กลาง
   const FLOOR_Y = 700;
   const TOP_SENSOR_Y = 150;             // เส้นบนของกรอบเล่น (ต้อง "ล้นเส้นนี้" ถึงจบเกม)

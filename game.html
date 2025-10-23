@@ -1,87 +1,101 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
-  <title>Jingooth Fusion Game 💫</title>
-  <style>
-    :root {
-      --accent: #8aa7ff;
-      --bg1: #fde2f3;
-      --bg2: #d8dcff;
-    }
-    *{box-sizing:border-box;}
-    body{
-      margin:0;
-      font-family:'Noto Sans Thai',system-ui,sans-serif;
-      background:linear-gradient(180deg,var(--bg1),var(--bg2));
-      overflow:hidden;
-      touch-action:none;
-    }
-    header{
-      position:fixed;top:0;left:0;right:0;
-      display:flex;justify-content:space-between;align-items:center;
-      padding:10px 14px;
-      background:rgba(255,255,255,.8);
-      backdrop-filter:blur(8px);
-      z-index:5;
-      font-weight:600;color:#444;
-    }
-    .brand{color:#7a9cff;}
-    .hud{display:flex;gap:12px;}
-    .wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:70px;}
-    canvas{
-      background:#eef1ff;border-radius:16px;
-      box-shadow:0 8px 20px rgba(0,0,0,.1);
-      max-width:100%;height:auto;
-      touch-action:none;
-    }
-    .panel{
-      position:fixed;inset:0;
-      display:flex;align-items:center;justify-content:center;
-      background:rgba(10,15,40,.5);
-      z-index:10;
-    }
-    .card{
-      background:#fff;border-radius:18px;padding:24px;text-align:center;
-      box-shadow:0 10px 30px rgba(0,0,0,.25);width:min(90vw,400px);
-    }
-    .btn{
-      padding:12px 20px;border:none;border-radius:12px;
-      background:var(--accent);color:#fff;font-weight:700;
-      cursor:pointer;font-size:16px;margin-top:12px;
-    }
-    footer{
-      position:fixed;bottom:8px;right:12px;
-      color:#7a9cff;font-size:14px;
-      text-shadow:0 1px 2px rgba(255,255,255,.8);
-      font-weight:600;
-    }
-  </style>
-  <script defer src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+<title>Jingooth Fusion Game 💫</title>
+<style>
+  :root{
+    --accent:#8aa7ff;
+    --bg1:#fde2f3;
+    --bg2:#d8dcff;
+    --line:#ffd8f0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Noto Sans Thai',system-ui,sans-serif;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    overflow:hidden;
+    touch-action:none;
+  }
+  header{
+    position:fixed;top:0;left:0;right:0;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 14px;background:rgba(255,255,255,.85);
+    backdrop-filter:blur(8px);
+    z-index:5;font-weight:600;color:#444;
+  }
+  .brand{color:#7a9cff;}
+  .hud{display:flex;gap:12px;}
+  .wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:70px;}
+  canvas{
+    background:#eef1ff;border-radius:16px;
+    box-shadow:0 8px 20px rgba(0,0,0,.1);
+    max-width:100%;height:auto;
+  }
+  .panel{
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(10,15,40,.5);z-index:10;
+  }
+  .card{
+    background:#fff;border-radius:18px;padding:24px;text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);width:min(90vw,400px);
+  }
+  .btn{
+    padding:12px 20px;border:none;border-radius:12px;
+    background:var(--accent);color:#fff;font-weight:700;
+    cursor:pointer;font-size:16px;margin-top:12px;
+  }
+  footer{
+    position:fixed;bottom:8px;right:12px;color:#7a9cff;font-size:14px;
+    text-shadow:0 1px 2px rgba(255,255,255,.8);font-weight:600;
+  }
+  #preview{
+    position:absolute;top:80px;left:50%;transform:translateX(-50%);
+    width:64px;height:64px;pointer-events:none;
+    filter:drop-shadow(0 3px 3px rgba(0,0,0,0.15));
+    animation:bounce 2s infinite ease-in-out;
+  }
+  @keyframes bounce{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,-10px);}}
+  .cute-line{
+    position:absolute;top:120px;left:50%;transform:translateX(-50%);
+    width:70%;height:10px;border-radius:10px;
+    background:repeating-linear-gradient(90deg,#ffd7ef,#ffd7ef 10px,#fff0fa 10px,#fff0fa 20px);
+    box-shadow:0 2px 6px rgba(255,200,230,.4);
+  }
+  .cute-line::after{
+    content:'💖';position:absolute;right:-18px;top:-12px;font-size:18px;
+    animation:heart 1.5s infinite ease-in-out;
+  }
+  @keyframes heart{0%,100%{transform:scale(1);}50%{transform:scale(1.3);}}
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
 </head>
 <body>
-  <header>
-    <div class="brand">🎮 Jingooth Fusion Game</div>
-    <div class="hud">
-      <div>Score: <span id="score">0</span></div>
-      <div>Level: <span id="nextLevel">1</span></div>
-    </div>
-  </header>
-
-  <div class="wrap">
-    <canvas id="game" width="420" height="720"></canvas>
+<header>
+  <div class="brand">🎮 Jingooth Fusion</div>
+  <div class="hud">
+    <div>Score: <span id="score">0</span></div>
+    <div>Level: <span id="nextLevel">1</span></div>
   </div>
+</header>
 
-  <div id="start" class="panel">
-    <div class="card">
-      <h1>Smile with Yeo Jin-goo 💕</h1>
-      <p style="font-size:14px;color:#777;">Tap to drop and merge the smiling faces!</p>
-      <button class="btn" onclick="window.startGame()">Start Game</button>
-    </div>
+<div class="wrap">
+  <canvas id="game" width="420" height="720"></canvas>
+  <img id="preview" src="" alt="preview">
+  <div class="cute-line"></div>
+</div>
+
+<div id="start" class="panel">
+  <div class="card">
+    <h1>Smile with Yeo Jin-goo 💕</h1>
+    <p style="font-size:14px;color:#777;">Tap to drop and merge the smiling faces!</p>
+    <button class="btn" onclick="window.startGame()">Start Game</button>
   </div>
+</div>
 
-  <footer>by: namaoi.sweet 💕</footer>
+<footer>by: namaoi.sweet 💕</footer>
 
 <script>
 (() => {
@@ -90,7 +104,8 @@
   const canvas = document.getElementById('game');
   const scoreEl = document.getElementById('score');
   const nextEl = document.getElementById('nextLevel');
-  let Engine, Render, World, Bodies, Events, Composite;
+  const preview = document.getElementById('preview');
+  let Engine, Render, World, Bodies, Events;
   let engine, render, world;
   let textures = [];
   let nextLevel = 1;
@@ -99,42 +114,35 @@
   let score = 0;
   let gameOver = false;
   let sensorActive = false;
-  let lastDropTime = 0;
 
-  const LOAD_DELAY = 800; // ms
-  const SAFE_SENSOR_DELAY = 1500; // ms
-
-  function loadImages(paths){
+  async function loadImages(paths){
     return Promise.all(paths.map(src=>new Promise((res,rej)=>{
-      const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=src;
+      const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src;
     })));
   }
 
   function setupMatter(){
-    Engine=Matter.Engine; Render=Matter.Render;
-    World=Matter.World; Bodies=Matter.Bodies; Events=Matter.Events;
+    Engine=Matter.Engine;Render=Matter.Render;
+    World=Matter.World;Bodies=Matter.Bodies;Events=Matter.Events;
     engine=Engine.create();
-    render=Render.create({
-      canvas, engine,
-      options:{wireframes:false,background:'transparent'}
-    });
+    render=Render.create({canvas,engine,options:{wireframes:false,background:'transparent'}});
     world=engine.world;
-    const w=canvas.width, h=canvas.height, t=40;
+    const w=canvas.width,h=canvas.height,t=40;
     World.add(world,[
       Bodies.rectangle(w/2,h+t/2,w,t,{isStatic:true}),
       Bodies.rectangle(-t/2,h/2,t,h,{isStatic:true}),
       Bodies.rectangle(w+t/2,h/2,t,h,{isStatic:true})
     ]);
-    const topSensor=Bodies.rectangle(w/2,80,w-40,10,{isStatic:true,isSensor:true,label:'topSensor'});
+    const topSensor=Bodies.rectangle(w/2,160,w-40,10,{isStatic:true,isSensor:true,label:'topSensor'});
     World.add(world,topSensor);
 
     Events.on(engine,'collisionStart',e=>{
       for(const p of e.pairs){
         const a=p.bodyA,b=p.bodyB;
-        if(a.isSensor||b.isSensor) continue;
+        if(a.isSensor||b.isSensor)continue;
         if(a.custom&&b.custom&&a.custom.level===b.custom.level){
-          const relSpeed=Math.hypot(a.velocity.x-b.velocity.x,a.velocity.y-b.velocity.y);
-          if(relSpeed<2) merge(a,b);
+          const rel=Math.hypot(a.velocity.x-b.velocity.x,a.velocity.y-b.velocity.y);
+          if(rel<2) merge(a,b);
         }
       }
     });
@@ -142,7 +150,7 @@
     Events.on(engine,'collisionActive',e=>{
       if(!sensorActive) return;
       const all=Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
-      if(all.length<4) return; // wait until few pieces exist
+      if(all.length<6) return;
       for(const p of e.pairs){
         const a=p.bodyA,b=p.bodyB;
         if((a.label==='topSensor'&&b.custom)||(b.label==='topSensor'&&a.custom)){
@@ -156,10 +164,10 @@
   }
 
   function addPiece(level,x=canvas.width/2){
-    const r=18+level*6;
+    const r=18+level*7;
     const tex=textures[level-1];
     const body=Bodies.circle(x,50,r,{
-      restitution:0.2,friction:0.001,
+      restitution:0.15,friction:0.001,
       render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}
     });
     body.custom={level};
@@ -171,12 +179,12 @@
     const level=a.custom.level;
     const nx=(a.position.x+b.position.x)/2;
     const ny=(a.position.y+b.position.y)/2;
-    World.remove(world,a); World.remove(world,b);
+    World.remove(world,a);World.remove(world,b);
     if(level<IMG_COUNT){
       const c=addPiece(level+1,nx);
       Matter.Body.setPosition(c,{x:nx,y:ny});
       score+=level*10;
-    } else score+=level*25;
+    }else score+=level*25;
     scoreEl.textContent=score;
   }
 
@@ -184,13 +192,11 @@
     const r=Math.random();
     nextLevel = r<.6?1 : r<.85?2 : r<.95?3 : 4;
     nextEl.textContent=nextLevel;
+    preview.src = textures[nextLevel-1].src;
   }
 
   function dropPiece(){
-    if(!allowDrop||gameOver) return;
-    const now=Date.now();
-    if(now-lastDropTime<500) return; // prevent double drop
-    lastDropTime=now;
+    if(!allowDrop||gameOver)return;
     addPiece(nextLevel,Math.max(30,Math.min(canvas.width-30,dropX)));
     scheduleNextLevel();
   }
@@ -200,6 +206,7 @@
       const rect=canvas.getBoundingClientRect();
       const clientX=e.touches?e.touches[0].clientX:e.clientX;
       dropX=(clientX-rect.left)*(canvas.width/rect.width);
+      preview.style.left=`${rect.left + (clientX-rect.left)}px`;
     };
     canvas.addEventListener('mousemove',move);
     canvas.addEventListener('touchmove',move,{passive:true});
@@ -208,8 +215,8 @@
   }
 
   function endGame(){
-    if(gameOver) return;
-    gameOver=true; allowDrop=false;
+    if(gameOver)return;
+    gameOver=true;allowDrop=false;
     const panel=document.getElementById('start');
     panel.style.display='flex';
     panel.querySelector('h1').innerText='Game Over 💥';
@@ -219,12 +226,9 @@
 
   async function boot(){
     textures=await loadImages(IMG_PATHS);
-    setupMatter();
-    initControls();
-    scheduleNextLevel();
+    setupMatter();initControls();scheduleNextLevel();
     allowDrop=true;
-    // Delay sensor activation
-    setTimeout(()=>sensorActive=true,SAFE_SENSOR_DELAY);
+    setTimeout(()=>sensorActive=true,2000);
   }
 
   window.startGame=()=>{
@@ -232,12 +236,12 @@
     if(engine){
       const bodies=Matter.Composite.allBodies(engine.world);
       for(const b of bodies){if(!b.isStatic)Matter.World.remove(engine.world,b);}
-      score=0;scoreEl.textContent='0';gameOver=false;
-      scheduleNextLevel();allowDrop=true;sensorActive=false;
-      setTimeout(()=>sensorActive=true,SAFE_SENSOR_DELAY);
+      score=0;scoreEl.textContent='0';gameOver=false;sensorActive=false;
+      scheduleNextLevel();allowDrop=true;
+      setTimeout(()=>sensorActive=true,2000);
       return;
     }
-    setTimeout(boot,LOAD_DELAY);
+    boot();
   };
 })();
 </script>

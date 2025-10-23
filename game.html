@@ -4,99 +4,142 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
 <title>Jingooth Fusion Game 💕</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+Thai:wght@600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --accent:#8aa7ff;
-  --bg1:#fde2f3;
-  --bg2:#d8dcff;
+:root {
+  --accent: #8aa7ff;
+  --bg1: #fde2f3;
+  --bg2: #d8dcff;
+  --pink: #ffb8de;
+  --violet: #a8b2ff;
 }
 *{box-sizing:border-box;}
-body{
+body {
   margin:0;
-  font-family:'Noto Sans Thai',system-ui,sans-serif;
+  font-family:'Noto Sans Thai','Fredoka One',system-ui,sans-serif;
   background:linear-gradient(180deg,var(--bg1),var(--bg2));
   overflow:hidden;touch-action:none;
 }
-header{
+
+/* Header & Score */
+header {
   position:fixed;top:0;left:0;right:0;
   display:flex;justify-content:space-between;align-items:center;
   padding:8px 16px;z-index:10;
 }
-.scorebox{
-  background:rgba(255,255,255,0.8);
-  border:2px solid #ffc8eb;border-radius:12px;
-  padding:8px 16px;font-weight:700;color:#7a58b1;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
+.scorebox {
+  background:linear-gradient(145deg,#ffe2f1,#fff3fb);
+  border:3px solid #ff99cc;
+  border-radius:20px;
+  padding:10px 18px;
+  font-size:26px;
+  font-weight:900;
+  color:#ff6fb0;
+  text-shadow:2px 2px 0px #fff;
+  box-shadow:0 4px 12px rgba(255,150,200,0.3);
+  animation:pop 1s infinite ease-in-out alternate;
 }
-.yoobox{
-  background:rgba(255,255,255,0.9);
-  border:2px solid #a5b4ff;border-radius:14px;
-  padding:6px 10px;font-weight:700;color:#6a64c9;
+@keyframes pop {0%{transform:scale(1);}100%{transform:scale(1.04);} }
+
+.yoobox {
+  background:linear-gradient(145deg,#dbe3ff,#ffffff);
+  border:3px solid #a8b2ff;
+  border-radius:18px;
+  padding:6px 14px;
+  font-weight:700;
+  color:#6a64c9;
   box-shadow:0 2px 8px rgba(100,100,255,.2);
+  font-size:18px;
 }
-.wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:70px;}
-canvas{
+
+/* Game area */
+.wrap {display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:70px;}
+canvas {
   background:#eef1ff;border-radius:16px;
   box-shadow:0 8px 20px rgba(0,0,0,.1);
   max-width:100%;height:auto;
 }
-#preview{
+#preview {
   position:absolute;top:90px;left:50%;transform:translateX(-50%);
   width:60px;height:60px;pointer-events:none;
   animation:bounce 2s infinite ease-in-out;
 }
-.cute-line{
+.cute-line {
   position:absolute;top:150px;left:50%;transform:translateX(-50%);
   width:70%;height:10px;border-radius:10px;
   background:repeating-linear-gradient(90deg,#ffd7ef,#ffd7ef 12px,#fff0fa 12px,#fff0fa 24px);
   box-shadow:0 2px 6px rgba(255,200,230,.4);
 }
-.cute-line::after{
-  content:'💖';position:absolute;right:-20px;top:-14px;font-size:18px;
-  animation:heart 1.5s infinite ease-in-out;
+.cute-line::after {
+  content:'💖';position:absolute;right:-20px;top:-14px;
+  font-size:18px;animation:heart 1.5s infinite ease-in-out;
 }
-@keyframes bounce{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,-10px);}}
-@keyframes heart{0%,100%{transform:scale(1);}50%{transform:scale(1.3);}}
-.panel{
+@keyframes bounce {0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,-10px);} }
+@keyframes heart {0%,100%{transform:scale(1);}50%{transform:scale(1.3);} }
+
+/* Game Over Panel */
+.panel {
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
   background:rgba(10,15,40,.5);z-index:20;
 }
-.card{
-  background:#fff;border-radius:18px;padding:24px;text-align:center;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);width:min(90vw,400px);
+.card {
+  background:#fff;border-radius:20px;padding:28px;text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  width:min(90vw,400px);
 }
-.btn{
-  padding:12px 20px;border:none;border-radius:12px;
-  background:var(--accent);color:#fff;font-weight:700;
-  cursor:pointer;font-size:16px;margin-top:12px;
+.card h1 {color:#ff79b0;margin-bottom:8px;}
+.card p {color:#777;margin:0;}
+.btn {
+  padding:14px 22px;border:none;border-radius:14px;
+  background:var(--accent);color:#fff;font-weight:800;
+  cursor:pointer;font-size:17px;margin-top:14px;
+  transition:all .2s;
 }
-footer{
+.btn:hover {transform:scale(1.08);}
+.btn.secondary {
+  background:linear-gradient(145deg,#ffa8d8,#ffbde5);
+  border:2px solid #ff87ca;
+}
+footer {
   position:fixed;bottom:8px;right:12px;
-  color:#7a9cff;font-size:14px;font-weight:600;text-shadow:0 1px 2px rgba(255,255,255,.8);
+  color:#7a9cff;font-size:14px;font-weight:600;
+  text-shadow:0 1px 2px rgba(255,255,255,.8);
 }
+
+/* Score Animation */
+@keyframes scorePulse {
+  0%{transform:scale(1);}
+  50%{transform:scale(1.3);}
+  100%{transform:scale(1);}
+}
+.pulse {animation:scorePulse 0.4s ease-in-out;}
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
 </head>
 <body>
 <header>
-  <div class="scorebox">⭐ Score: <span id="score">0</span></div>
+  <div class="scorebox">⭐ <span id="score">0</span></div>
   <div class="yoobox">💗 Yoo Jin Goo 💗</div>
 </header>
+
 <div class="wrap">
   <canvas id="game" width="420" height="720"></canvas>
   <img id="preview" src="">
   <div class="cute-line"></div>
 </div>
+
 <div id="start" class="panel">
   <div class="card">
     <h1>Smile with Yeo Jin-goo 💕</h1>
-    <p style="font-size:14px;color:#777;">Tap to drop and merge the smiling faces!</p>
-    <button class="btn" onclick="window.startGame()">Start Game</button>
+    <p>Tap to drop and merge the smiling faces!</p>
+    <button class="btn" id="btnStart" onclick="window.startGame()">Start Game</button>
+    <button class="btn secondary" id="btnBack" style="display:none;" onclick="window.location.href='index.html'">🏠 กลับหน้าแรก</button>
   </div>
 </div>
+
 <footer>by: namaoi.sweet 💕</footer>
 
-<!-- เสียง -->
+<!-- Sounds -->
 <audio id="soundDrop" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2f5a0e7b8f.mp3?filename=pop-94319.mp3" preload="auto"></audio>
 <audio id="soundMerge" src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_00e08ad807.mp3?filename=soft-bling-1046.mp3" preload="auto"></audio>
 <audio id="soundOver" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_34563f6ef3.mp3?filename=cute-little-failure-94669.mp3" preload="auto"></audio>
@@ -108,14 +151,21 @@ footer{
   const canvas=document.getElementById('game');
   const scoreEl=document.getElementById('score');
   const preview=document.getElementById('preview');
+  const btnStart=document.getElementById('btnStart');
+  const btnBack=document.getElementById('btnBack');
   const sDrop=document.getElementById('soundDrop');
   const sMerge=document.getElementById('soundMerge');
   const sOver=document.getElementById('soundOver');
+  const SAFE_LINE_Y=100;
   let Engine,Render,World,Bodies,Events;
   let engine,render,world;
-  let textures=[],nextLevel=1,allowDrop=false,dropX=canvas.width/2,score=0,gameOver=false,sensorActive=false;
+  let textures=[],nextLevel=1,allowDrop=false,dropX=canvas.width/2,score=0,gameOver=false;
 
-  async function loadImages(paths){return Promise.all(paths.map(src=>new Promise((res,rej)=>{const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src;})));}
+  async function loadImages(paths){
+    return Promise.all(paths.map(src=>new Promise((res,rej)=>{
+      const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src;
+    })));
+  }
 
   function setupMatter(){
     Engine=Matter.Engine;Render=Matter.Render;World=Matter.World;Bodies=Matter.Bodies;Events=Matter.Events;
@@ -128,38 +178,29 @@ footer{
       Bodies.rectangle(-t/2,h/2,t,h,{isStatic:true}),
       Bodies.rectangle(w+t/2,h/2,t,h,{isStatic:true})
     ]);
-    const topSensor=Bodies.rectangle(w/2,160,w-40,10,{isStatic:true,isSensor:true,label:'topSensor'});
-    World.add(world,topSensor);
+    Matter.Runner.run(Matter.Runner.create(),engine);
+    Render.run(render);
 
     Events.on(engine,'collisionStart',e=>{
       for(const p of e.pairs){
         const a=p.bodyA,b=p.bodyB;
-        if(a.isSensor||b.isSensor)continue;
         if(a.custom&&b.custom&&a.custom.level===b.custom.level&&!a.merged&&!b.merged){
           a.merged=b.merged=true;
-          setTimeout(()=>merge(a,b),100);
+          setTimeout(()=>merge(a,b),80);
         }
       }
     });
-
-    Events.on(engine,'collisionActive',()=>{
-      if(!sensorActive)return;
-      const all=Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
-      const highest=Math.min(...all.map(b=>b.position.y));
-      if(highest<120){endGame();}
-    });
-
-    Render.run(render);
-    Matter.Runner.run(Matter.Runner.create(),engine);
   }
 
   function addPiece(level,x=canvas.width/2){
     const r=18+level*7;
     const tex=textures[level-1];
-    const body=Bodies.circle(x,80,r,{restitution:0.15,friction:0.001,
-      render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}});
+    const body=Matter.Bodies.circle(x,60,r,{
+      restitution:0.15,friction:0.001,
+      render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}
+    });
     body.custom={level};
-    World.add(world,body);
+    Matter.World.add(world,body);
     sDrop.currentTime=0;sDrop.play();
     return body;
   }
@@ -167,14 +208,17 @@ footer{
   function merge(a,b){
     const level=a.custom.level;
     const nx=(a.position.x+b.position.x)/2,ny=(a.position.y+b.position.y)/2;
-    World.remove(world,a);World.remove(world,b);
+    Matter.World.remove(world,a);Matter.World.remove(world,b);
     if(level<IMG_COUNT){
       const c=addPiece(level+1,nx);
       Matter.Body.setPosition(c,{x:nx,y:ny});
       score+=level*10;
       sMerge.currentTime=0;sMerge.play();
-    }else score+=level*25;
+    } else score+=level*25;
     scoreEl.textContent=score;
+    scoreEl.classList.add("pulse");
+    setTimeout(()=>scoreEl.classList.remove("pulse"),400);
+    checkGameOver();
   }
 
   function scheduleNextLevel(){
@@ -189,6 +233,13 @@ footer{
     scheduleNextLevel();
   }
 
+  function checkGameOver(){
+    const all=Matter.Composite.allBodies(engine.world).filter(b=>b.custom);
+    if(all.length<8)return;
+    const topMost=Math.min(...all.map(b=>b.position.y-(b.circleRadius||0)));
+    if(topMost<SAFE_LINE_Y){endGame();}
+  }
+
   function initControls(){
     const move=e=>{
       const rect=canvas.getBoundingClientRect();
@@ -198,35 +249,35 @@ footer{
     };
     canvas.addEventListener('mousemove',move);
     canvas.addEventListener('touchmove',move,{passive:true});
-    canvas.addEventListener('click',dropPiece);
-    canvas.addEventListener('touchend',dropPiece,{passive:true});
+    canvas.addEventListener('click',()=>dropPiece());
+    canvas.addEventListener('touchend',()=>dropPiece(),{passive:true});
   }
 
   function endGame(){
     if(gameOver)return;
-    gameOver=true;allowDrop=false;sensorActive=false;
+    gameOver=true;allowDrop=false;
     sOver.currentTime=0;sOver.play();
     const panel=document.getElementById('start');
     panel.style.display='flex';
-    panel.querySelector('h1').innerText='Game Over 💥';
-    panel.querySelector('p').innerText='Thanks for smiling with Yeo Jin-goo 🌸';
-    panel.querySelector('button').textContent='Play again';
+    panel.querySelector('h1').innerText='เกมจบแล้ว 💥';
+    panel.querySelector('p').innerText='ขอบคุณที่ยิ้มไปกับยอจินกูนะคะ 🌸';
+    btnStart.textContent='🔄 เล่นอีกครั้ง';
+    btnBack.style.display='inline-block';
   }
 
   async function boot(){
     textures=await loadImages(IMG_PATHS);
     setupMatter();initControls();scheduleNextLevel();allowDrop=true;
-    setTimeout(()=>sensorActive=true,2500);
   }
 
   window.startGame=()=>{
     document.getElementById('start').style.display='none';
     if(engine){
       const bodies=Matter.Composite.allBodies(engine.world);
-      for(const b of bodies){if(!b.isStatic)Matter.World.remove(engine.world,b);}
-      score=0;scoreEl.textContent='0';gameOver=false;sensorActive=false;
+      for(const b of bodies){if(!b.isStatic)Matter.World.remove(world,b);}
+      score=0;scoreEl.textContent='0';gameOver=false;
       scheduleNextLevel();allowDrop=true;
-      setTimeout(()=>sensorActive=true,2500);
+      btnBack.style.display='none';
       return;
     }
     boot();

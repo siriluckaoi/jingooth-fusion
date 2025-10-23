@@ -11,39 +11,354 @@ html,body{
   background:linear-gradient(180deg,#fde2f3,#d8dcff);
   font-family:'Fredoka One',sans-serif;overflow:hidden;touch-action:none;
 }
-#gameContainer{
+#stage{
   position:relative;width:100%;height:100%;
   display:flex;justify-content:center;align-items:center;
 }
-canvas{
-  aspect-ratio:420/648;width:100%;max-width:480px;height:auto;
+canvas.game{
+  aspect-ratio:420/648; width:100%; max-width:520px; height:auto;
   background:#eef1ff;border-radius:20px;box-shadow:0 6px 14px rgba(0,0,0,.2);
+  touch-action:none; display:block;
 }
-#sparkleCanvas{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  pointer-events:none;
+#fx { /* overlay สำหรับประกาย */
+  position:absolute; inset:auto; pointer-events:none;
+  aspect-ratio:420/648; width:100%; max-width:520px; height:auto;
 }
 .scorebox{
-  position:absolute;top:3%;left:50%;transform:translateX(-50%);
+  position:absolute; top:3%; left:50%; transform:translateX(-50%);
   background:#fff8fb;border:3px solid #ff5b8a;border-radius:18px;
   padding:6px 16px;font-size:26px;color:#ff5b8a;font-weight:900;
-  text-shadow:1px 1px 0 #fff;box-shadow:0 3px 8px rgba(0,0,0,0.1);
-}
-#preview{
-  position:absolute;top:11%;left:50%;transform:translateX(-50%);
-  width:70px;height:70px;pointer-events:none;
+  text-shadow:1px 1px 0 #fff; box-shadow:0 3px 8px rgba(0,0,0,0.1); z-index:3;
 }
 .cute-line{
-  position:absolute;top:17%;left:50%;transform:translateX(-50%);
-  width:78%;height:6px;border-radius:10px;
+  position:absolute; top:17%; left:50%; transform:translateX(-50%);
+  width:78%; height:6px; border-radius:10px;
   background:repeating-linear-gradient(90deg,#ffd7ef,#ffd7ef 12px,#fff0fa 12px,#fff0fa 24px);
-  box-shadow:0 2px 6px rgba(255,200,230,.4);
+  box-shadow:0 2px 6px rgba(255,200,230,.4); z-index:2;
+}
+#preview{
+  position:absolute; top:11%; left:50%; transform:translateX(-50%);
+  width:70px; height:70px; pointer-events:none; z-index:3;
+  filter: drop-shadow(0 4px 8px rgba(255,170,200,.5));
 }
 #heightBar{
-  position:absolute;top:17%;right:4%;
-  width:12px;height:60%;background:#d7e7ff;border-radius:10px;overflow:hidden;
-  box-shadow:inset 0 0 4px rgba(0,0,0,0.2);
+  position:absolute; right:calc(50% - min(260px, 50vw) - 10px); /* ชิดขอบ canvas ขวา */
+  top:50%; transform:translateY(-50%);
+  width:10px; height:65vh; max-height:75%;
+  background:#ffffffb0; border:2px solid #e6e6ff; border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.12); z-index:3;
 }
 #heightFill{
-  position:absolute;bottom:0;width:100%;height:0%;
-  background:linear-gradient(180deg,#8ee3
+  position:absolute; bottom:0; left:0; width:100%; height:0%;
+  background:linear-gradient(180deg,#9ad0ff,#ffe08a,#ffb37f,#ff86b5);
+  border-radius:8px;
+  transition:height .2s ease;
+}
+.panel{
+  position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.45); z-index:10; text-align:center;
+}
+.card{
+  background:#fff;border-radius:20px;padding:24px;width:85%;max-width:380px;
+  box-shadow:0 10px 25px rgba(0,0,0,.25);
+}
+.card h1{font-size:22px;margin-bottom:8px;color:#ff5b8a; white-space:nowrap;}
+.card p{font-size:14px;color:#555;margin-bottom:12px;}
+.btn{
+  border:none;border-radius:12px;padding:12px 18px;margin:6px;
+  font-weight:700;font-size:16px;color:#fff;cursor:pointer;
+}
+.btn.primary{background:#8aa7ff;}
+.btn.secondary{background:linear-gradient(145deg,#ffa8d8,#ffbde5);border:2px solid #ff87ca;}
+footer{
+  position:fixed;bottom:8px;right:10px;color:#7a9cff;font-size:13px;font-weight:600;
+  text-shadow:0 1px 2px rgba(255,255,255,.8);
+}
+.pulse{animation:scorePulse .3s ease-in-out;}
+@keyframes scorePulse{0%{transform:scale(1);}50%{transform:scale(1.25);}100%{transform:scale(1);}}
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+</head>
+<body>
+<div id="stage">
+  <canvas id="game" class="game" width="420" height="648"></canvas>
+  <canvas id="fx" class="game" width="420" height="648"></canvas>
+  <div class="cute-line"></div>
+  <img id="preview" src="">
+  <div class="scorebox">⭐ <span id="score">0</span></div>
+  <div id="heightBar"><div id="heightFill"></div></div>
+</div>
+
+<div id="panel" class="panel">
+  <div class="card">
+    <h1>Smile with Yeo Jin-goo 💕</h1>
+    <p>Tap to drop and merge the smiling faces!</p>
+    <button class="btn primary" id="btnStart">Start Game</button>
+    <button class="btn secondary" id="btnBack" style="display:none;" onclick="location.href='index.html'">🏠 Back to Main</button>
+  </div>
+</div>
+
+<footer>by: namaoi.sweet 💕</footer>
+
+<script>
+/* -------------------- CONFIG -------------------- */
+const W = 420, H = 648;              // ขนาด playfield (ลดสูงลง ~10%)
+const SAFE_LINE_Y = 120;             // เส้นเพดาน (ยิ่งเลขน้อยยิ่งใกล้บน)
+const MIN_PIECES_BEFORE_CHECK = 12;  // มีชิ้นอย่างน้อยเท่านี้ก่อนเริ่มตรวจ game over
+const DROP_DEBOUNCE_MS = 420;        // กันทัชซ้ำ
+const SPARKLE_COUNT = 8;             // จำนวนประกายตอน merge
+const SPARKLE_LIFE = 550;            // อายุประกาย (ms) แนวหวานนุ่ม
+const IMG_COUNT = 12;
+const IMG_PATHS = Array.from({length:IMG_COUNT}, (_,i)=>`images/face${i+1}.png`);
+
+/* -------------------- DOM -------------------- */
+const canvas = document.getElementById('game');
+const fxCanvas = document.getElementById('fx');
+const scoreEl = document.getElementById('score');
+const preview = document.getElementById('preview');
+const panel = document.getElementById('panel');
+const btnStart = document.getElementById('btnStart');
+const btnBack = document.getElementById('btnBack');
+const heightFill = document.getElementById('heightFill');
+
+/* -------------------- Matter aliases -------------------- */
+let Engine, Render, World, Bodies, Events, engine, world;
+
+/* -------------------- State -------------------- */
+let textures = [];
+let allowDrop = false, dropX = W/2, lastDrop = 0;
+let score = 0, nextLevel = 1, gameOver = false;
+
+/* -------------------- Audio (Web AudioContext) -------------------- */
+let audioCtx=null, audioBuffers={}, bgmNode=null;
+const sounds = {
+  drop:"https://cdn.pixabay.com/download/audio/2022/03/15/audio_2f5a0e7b8f.mp3?filename=pop-94319.mp3",
+  merge:"https://cdn.pixabay.com/download/audio/2021/09/06/audio_00e08ad807.mp3?filename=soft-bling-1046.mp3",
+  over:"https://cdn.pixabay.com/download/audio/2022/03/15/audio_34563f6ef3.mp3?filename=cute-little-failure-94669.mp3",
+  bgm :"https://cdn.pixabay.com/download/audio/2022/03/09/audio_bf188c76da.mp3?filename=happy-day-11157.mp3"
+};
+async function ensureAudio(){
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  const load = async url => {
+    const res = await fetch(url); const ab = await res.arrayBuffer();
+    return await audioCtx.decodeAudioData(ab);
+  };
+  for (const [k,v] of Object.entries(sounds)) audioBuffers[k] = await load(v);
+}
+function playS(name, {loop=false, vol=0.35}={}){
+  if (!audioCtx || !audioBuffers[name]) return null;
+  const src = audioCtx.createBufferSource();
+  const gain = audioCtx.createGain(); gain.gain.value = vol;
+  src.buffer = audioBuffers[name]; src.loop = loop;
+  src.connect(gain).connect(audioCtx.destination);
+  try { src.start(0); } catch {}
+  if (name==='bgm') bgmNode = src;
+  return src;
+}
+function stopBGM(){ if (bgmNode){ try{bgmNode.stop();}catch{} bgmNode=null; } }
+
+/* -------------------- Sparkle FX -------------------- */
+const fx = fxCanvas.getContext('2d');
+let sparkles = [];
+function spawnSparkles(x,y){
+  for (let i=0;i<SPARKLE_COUNT;i++){
+    const ang = (Math.PI*2/SPARKLE_COUNT)*i + Math.random()*0.5;
+    const spd = 0.7 + Math.random()*1.2;
+    sparkles.push({
+      x, y, vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd,
+      r: 3+Math.random()*3, t: 0, life: SPARKLE_LIFE
+    });
+  }
+}
+let lastFx = performance.now();
+function fxLoop(ts){
+  const dt = ts - lastFx; lastFx = ts;
+  fx.clearRect(0,0,W,H);
+  sparkles = sparkles.filter(p=>{
+    p.t += dt; const k = p.t/p.life;
+    p.x += p.vx; p.y += p.vy*0.98; // ละมุน ๆ
+    const alpha = Math.max(0, 0.9*(1-k));
+    const grd = fx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2.2);
+    grd.addColorStop(0, `rgba(255,255,255,${alpha})`);
+    grd.addColorStop(1, `rgba(255,182,206,${alpha*0.65})`);
+    fx.fillStyle = grd;
+    fx.beginPath(); fx.arc(p.x,p.y,p.r,0,Math.PI*2); fx.fill();
+    return p.t < p.life;
+  });
+  requestAnimationFrame(fxLoop);
+}
+requestAnimationFrame(fxLoop);
+
+/* -------------------- Helpers -------------------- */
+async function loadImages(){
+  return Promise.all(IMG_PATHS.map(src=>new Promise((res,rej)=>{
+    const img = new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=src;
+  })));
+}
+function scheduleNextLevel(){
+  const r = Math.random();
+  nextLevel = r<.6?1 : r<.85?2 : r<.95?3 : 4;
+  preview.src = textures[nextLevel-1].src;
+}
+function updateHeightBar(){
+  const bodies = Matter.Composite.allBodies(world).filter(b=>b.custom);
+  if (bodies.length===0){ heightFill.style.height = '0%'; return; }
+  const top = Math.min(...bodies.map(b=>b.position.y-(b.circleRadius||0)));
+  // จากล่างขึ้นบน: 0% ที่กองสูง 0, 100% เมื่อแตะเพดาน
+  const maxSpan = H - SAFE_LINE_Y;        // ระยะจากเส้นบนถึงพื้น
+  const span = Math.max(0, H - top);      // สูงจากพื้นจริง ๆ
+  const pct = Math.min(100, Math.max(0, (span/maxSpan)*100));
+  heightFill.style.height = pct + '%';
+}
+function checkGameOver(){
+  const all = Matter.Composite.allBodies(world).filter(b=>b.custom);
+  if (all.length < MIN_PIECES_BEFORE_CHECK) return;
+  const top = Math.min(...all.map(b=>b.position.y-(b.circleRadius||0)));
+  if (top < SAFE_LINE_Y){ endGame(); }
+}
+
+/* -------------------- Matter setup -------------------- */
+function setupMatter(){
+  Engine = Matter.Engine; Render = Matter.Render;
+  World = Matter.World; Bodies = Matter.Bodies; Events = Matter.Events;
+  engine = Engine.create();
+  const render = Render.create({
+    canvas, engine, options:{ width:W, height:H, wireframes:false, background:'transparent' }
+  });
+  world = engine.world;
+
+  // กำแพง/พื้น
+  World.add(world,[
+    Bodies.rectangle(W/2, H+20, W, 40, {isStatic:true}),
+    Bodies.rectangle(-20, H/2, 40, H, {isStatic:true}),
+    Bodies.rectangle(W+20, H/2, 40, H, {isStatic:true}),
+  ]);
+
+  // รวมชิ้น (merge) นุ่ม ๆ
+  Events.on(engine,'collisionStart', e=>{
+    for (const p of e.pairs){
+      const a=p.bodyA, b=p.bodyB;
+      if (a.custom && b.custom && a.custom.level===b.custom.level && !a.merged && !b.merged){
+        a.merged = b.merged = true;
+        setTimeout(()=>merge(a,b), 90);
+      }
+    }
+  });
+
+  Matter.Runner.run(Matter.Runner.create(), engine);
+  Render.run(render);
+}
+
+/* -------------------- Gameplay -------------------- */
+function addPiece(level, x=W/2){
+  const r = 18 + level*6;
+  const tex = textures[level-1];
+  const body = Bodies.circle(x, 90, r, {
+    restitution:0.15, friction:0.001,
+    render:{ sprite:{ texture:tex.src, xScale:(r*2)/tex.width, yScale:(r*2)/tex.height } }
+  });
+  body.custom = { level };
+  World.add(world, body);
+  playS('drop', {vol:.35});
+  return body;
+}
+function merge(a,b){
+  const lvl = a.custom.level;
+  const nx = (a.position.x+b.position.x)/2;
+  const ny = (a.position.y+b.position.y)/2;
+  World.remove(world,a); World.remove(world,b);
+
+  // เอฟเฟกต์ประกายแบบหวานนุ่ม
+  spawnSparkles(nx, ny);
+
+  if (lvl < IMG_COUNT){
+    const c = addPiece(lvl+1, nx);
+    Matter.Body.setPosition(c, {x:nx, y:ny});
+    score += lvl*10;
+    playS('merge', {vol:.45});
+  } else {
+    score += lvl*25;
+  }
+  scoreEl.textContent = score;
+  scoreEl.classList.add('pulse'); setTimeout(()=>scoreEl.classList.remove('pulse'), 320);
+  updateHeightBar();
+  checkGameOver();
+}
+function dropPiece(){
+  const now = Date.now();
+  if (!allowDrop || gameOver || (now-lastDrop) < DROP_DEBOUNCE_MS) return;
+  lastDrop = now;
+  addPiece(nextLevel, Math.max(30, Math.min(W-30, dropX)));
+  scheduleNextLevel();
+}
+function endGame(){
+  if (gameOver) return;
+  gameOver = true; allowDrop = false;
+  stopBGM(); playS('over', {vol:.6});
+  panel.style.display='flex';
+  panel.querySelector('h1').innerText = 'Game Over 💥';
+  panel.querySelector('p').innerText  = 'Thanks for smiling with Yeo Jin Goo 🌸';
+  btnStart.textContent='🔄 Play Again';
+  btnBack.style.display='inline-block';
+}
+
+/* -------------------- Controls -------------------- */
+function initControls(){
+  const move = e=>{
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    // map ไปยังพิกัด world (420 กว้าง)
+    const x = (clientX - rect.left) * (W / rect.width);
+    dropX = Math.max(30, Math.min(W-30, x));
+    // ตำแหน่ง preview ให้ยึดตำแหน่งหน้าจอ (ไม่ต้องคำนวนสเกล)
+    preview.style.left = `${clientX}px`;
+  };
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('touchmove', move, {passive:true});
+  const once = ()=>dropPiece();
+  canvas.addEventListener('click', once);
+  canvas.addEventListener('touchend', once, {passive:true});
+}
+
+/* -------------------- Boot -------------------- */
+async function boot(){
+  textures = await loadImages();
+  setupMatter(); initControls(); scheduleNextLevel();
+  allowDrop = true;
+  // เริ่มอัปเดตแถบความสูงเรื่อย ๆ
+  setInterval(updateHeightBar, 250);
+}
+
+/* -------------------- Start / Restart -------------------- */
+btnStart.addEventListener('click', async ()=>{
+  if (!audioCtx) { await ensureAudio(); }
+  // ปลดล็อกเสียง + เล่น BGM เบาๆ
+  if (audioCtx && audioCtx.state==='suspended'){ try{ await audioCtx.resume(); }catch{} }
+  if (!bgmNode){ playS('bgm', {loop:true, vol:0.22}); }
+
+  panel.style.display='none';
+  if (engine){
+    // รีสตาร์ท
+    const bodies = Matter.Composite.allBodies(world);
+    for (const b of bodies){ if (!b.isStatic) World.remove(world, b); }
+    score = 0; scoreEl.textContent = '0'; gameOver = false;
+    sparkles = []; updateHeightBar();
+    btnBack.style.display='none';
+    scheduleNextLevel(); allowDrop = true;
+  } else {
+    // start ครั้งแรก
+    boot();
+  }
+});
+
+/* ปรับขนาด overlay FX ให้ทับ canvas แบบ responsive อัตโนมัติ */
+const syncFxSize = ()=>{
+  // ใช้ขนาด attribute คงที่ W×H สำหรับการวาด (ไม่ต้องเปลี่ยน)
+  // แต่ CSS จะสเกลพร้อม canvas อัตโนมัติผ่านคลาส .game
+};
+window.addEventListener('resize', syncFxSize);
+syncFxSize();
+</script>
+</body>
+</html>

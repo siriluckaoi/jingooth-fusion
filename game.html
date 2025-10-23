@@ -1,88 +1,77 @@
 <!doctype html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
   <title>Jingooth Fusion Game 💫</title>
   <style>
     :root {
-      --bg: #f7f7fb;
-      --card: #ffffff;
-      --txt: #222;
-      --muted: #666;
       --accent: #8aa7ff;
+      --bg1: #fde2f3;
+      --bg2: #d8dcff;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Thai', sans-serif;
-      background: linear-gradient(180deg, #fde2f3, #d8dcff);
-      color: var(--txt);
-      overflow: hidden;
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:'Noto Sans Thai',system-ui,sans-serif;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));
+      overflow:hidden;
+      touch-action:none;
     }
-    header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 14px;
-      background: rgba(255, 255, 255, .8);
-      backdrop-filter: blur(8px);
-      z-index: 5;
-      border-bottom: 1px solid #e9ebff;
-      font-weight: 600;
+    header{
+      position:fixed;top:0;left:0;right:0;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 14px;
+      background:rgba(255,255,255,.8);
+      backdrop-filter:blur(8px);
+      z-index:5;
+      font-weight:600;
+      color:#444;
     }
-    .brand { font-weight: 700; color: #7a9cff; }
-    .hud { display: flex; gap: 12px; }
-    .wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100svh;
-      padding: 80px 12px 16px;
+    .brand{color:#7a9cff;}
+    .hud{display:flex;gap:12px;}
+    .wrap{
+      display:flex;align-items:center;justify-content:center;
+      min-height:100vh;
+      padding-top:70px;
     }
-    canvas {
-      background: #eef1ff;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.08);
-      max-width: 100%;
-      height: auto;
+    canvas{
+      background:#eef1ff;
+      border-radius:16px;
+      box-shadow:0 8px 20px rgba(0,0,0,.1);
+      max-width:100%;height:auto;
+      touch-action:none;
     }
-    .panel {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(10,15,40,.5);
-      z-index: 10;
+    .panel{
+      position:fixed;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(10,15,40,.5);
+      z-index:10;
     }
-    .card {
-      background: var(--card);
-      width: min(720px, 92vw);
-      border-radius: 18px;
-      padding: 22px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      text-align: center;
+    .card{
+      background:#fff;
+      border-radius:18px;
+      padding:24px;
+      text-align:center;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+      width:min(90vw,400px);
     }
-    .btn {
-      padding: 12px 18px;
-      border: none;
-      border-radius: 12px;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
+    .btn{
+      padding:12px 20px;
+      border:none;
+      border-radius:12px;
+      background:var(--accent);
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+      font-size:16px;
+      margin-top:12px;
     }
-    footer {
-      position: fixed;
-      bottom: 8px;
-      right: 12px;
-      font-size: 14px;
-      color: #7a9cff;
-      font-weight: 600;
-      text-shadow: 0 1px 2px rgba(255,255,255,0.8);
-      font-family: 'Noto Sans Thai', system-ui, sans-serif;
-      z-index: 20;
+    footer{
+      position:fixed;bottom:8px;right:12px;
+      color:#7a9cff;font-size:14px;
+      text-shadow:0 1px 2px rgba(255,255,255,.8);
+      font-weight:600;
     }
   </style>
   <script defer src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
@@ -97,14 +86,14 @@
   </header>
 
   <div class="wrap">
-    <canvas id="game" width="432" height="768"></canvas>
+    <canvas id="game" width="420" height="720"></canvas>
   </div>
 
   <div id="start" class="panel">
     <div class="card">
-      <h1>พร้อมจะยิ้มไปกับยอจินกูหรือยัง 💕</h1>
-      <p style="font-size:14px;color:#777;">แตะเพื่อเริ่มเกม แล้วรวมชิ้นยิ้มของคุณให้มากที่สุดนะ!</p>
-      <button class="btn" onclick="window.startGame()">START !</button>
+      <h1>Smile with Yeo Jin-goo 💕</h1>
+      <p style="font-size:14px;color:#777;">Tap to drop and merge the smiling faces!</p>
+      <button class="btn" onclick="window.startGame()">Start Game</button>
     </div>
   </div>
 
@@ -119,165 +108,145 @@
   const nextEl = document.getElementById('nextLevel');
 
   let Engine, Render, World, Bodies, Body, Events, Composite;
-  let engine, render;
-  let world;
+  let engine, render, world;
   let textures = [];
   let nextLevel = 1;
   let allowDrop = false;
   let dropX = canvas.width/2;
   let score = 0;
   let gameOver = false;
+  let started = false;
 
   function loadImages(paths){
     return Promise.all(paths.map(src=>new Promise((res,rej)=>{
-      const img = new Image();
-      img.onload = ()=>res(img);
-      img.onerror = rej;
-      img.src = src;
+      const img=new Image();
+      img.onload=()=>res(img);
+      img.onerror=rej;
+      img.src=src;
     })));
   }
 
   function setupMatter(){
-    Engine = Matter.Engine;
-    Render = Matter.Render;
-    World = Matter.World;
-    Bodies = Matter.Bodies;
-    Body = Matter.Body;
-    Events = Matter.Events;
-    Composite = Matter.Composite;
+    Engine=Matter.Engine;Render=Matter.Render;
+    World=Matter.World;Bodies=Matter.Bodies;Body=Matter.Body;
+    Events=Matter.Events;Composite=Matter.Composite;
 
-    engine = Engine.create();
-    render = Render.create({
-      canvas: canvas,
-      engine: engine,
-      options: { wireframes:false, background:'transparent' }
+    engine=Engine.create();
+    render=Render.create({
+      canvas:canvas,engine:engine,
+      options:{wireframes:false,background:'transparent'}
     });
-    world = engine.world;
+    world=engine.world;
 
-    const w = canvas.width, h = canvas.height;
-    const thickness = 40;
-    World.add(world, [
-      Bodies.rectangle(w/2, h+thickness/2, w, thickness, { isStatic:true }),
-      Bodies.rectangle(-thickness/2, h/2, thickness, h, { isStatic:true }),
-      Bodies.rectangle(w+thickness/2, h/2, thickness, h, { isStatic:true })
+    const w=canvas.width,h=canvas.height,t=40;
+    World.add(world,[
+      Bodies.rectangle(w/2,h+t/2,w,t,{isStatic:true}),
+      Bodies.rectangle(-t/2,h/2,t,h,{isStatic:true}),
+      Bodies.rectangle(w+t/2,h/2,t,h,{isStatic:true})
     ]);
 
-    const topSensor = Bodies.rectangle(w/2, 120, w-20, 10, { isStatic:true, isSensor:true, label:'topSensor' });
-    World.add(world, topSensor);
+    const topSensor=Bodies.rectangle(w/2,100,w-20,10,{isStatic:true,isSensor:true,label:'topSensor'});
+    World.add(world,topSensor);
 
-    Events.on(engine, 'collisionStart', evt => {
-      const pairs = evt.pairs;
-      for(const p of pairs){
-        const a = p.bodyA, b = p.bodyB;
-        if(a.isSensor || b.isSensor) continue;
-        if(a.custom && b.custom && a.custom.level === b.custom.level){
-          const relSpeed = Math.hypot(a.velocity.x-b.velocity.x, a.velocity.y-b.velocity.y);
-          if(relSpeed < 2){
-            merge(a,b);
-          }
+    Events.on(engine,'collisionStart',e=>{
+      for(const p of e.pairs){
+        const a=p.bodyA,b=p.bodyB;
+        if(a.isSensor||b.isSensor) continue;
+        if(a.custom&&b.custom&&a.custom.level===b.custom.level){
+          const relSpeed=Math.hypot(a.velocity.x-b.velocity.x,a.velocity.y-b.velocity.y);
+          if(relSpeed<2) merge(a,b);
         }
       }
     });
 
-    Events.on(engine, 'collisionActive', evt => {
-      for(const p of evt.pairs){
-        const a = p.bodyA, b = p.bodyB;
-        if((a.label==='topSensor' && b.custom) || (b.label==='topSensor' && a.custom)){
-          gameOver = true;
-          allowDrop = false;
-          const panel = document.getElementById('start');
-          panel.style.display='flex';
-          panel.querySelector('h1').innerText = 'เกมจบแล้ว 💥';
-          panel.querySelector('p').innerText = 'ขอบคุณที่ยิ้มไปกับยอจินกูนะคะ 🌸';
-          panel.querySelector('button').textContent = 'เล่นอีกครั้ง';
+    Events.on(engine,'collisionActive',e=>{
+      if(!started) return; // ignore early collisions
+      for(const p of e.pairs){
+        const a=p.bodyA,b=p.bodyB;
+        if((a.label==='topSensor'&&b.custom)||(b.label==='topSensor'&&a.custom)){
+          endGame();
         }
       }
     });
 
     Render.run(render);
-    const runner = Matter.Runner.create();
-    Matter.Runner.run(runner, engine);
+    Matter.Runner.run(Matter.Runner.create(),engine);
   }
 
-  function addPiece(level, x=canvas.width/2){
-    const r = 18 + level*6;
-    const tex = textures[level-1];
-    const body = Bodies.circle(x, 50, r, {
-      restitution: 0.2,
-      friction: 0.001,
-      render: {
-        sprite: { texture: tex.src, xScale: (r*2)/tex.width, yScale:(r*2)/tex.height }
-      }
+  function addPiece(level,x=canvas.width/2){
+    const r=18+level*6;
+    const tex=textures[level-1];
+    const body=Bodies.circle(x,40,r,{
+      restitution:0.2,friction:0.001,
+      render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}
     });
-    body.custom = { level };
-    World.add(engine.world, body);
+    body.custom={level};
+    World.add(world,body);
     return body;
   }
 
   function merge(a,b){
-    const level = a.custom.level;
-    const nx = (a.position.x + b.position.x)/2;
-    const ny = (a.position.y + b.position.y)/2;
-    World.remove(engine.world, a);
-    World.remove(engine.world, b);
-    if(level < IMG_COUNT){
-      const c = addPiece(level+1, nx);
-      Matter.Body.setPosition(c, {x:nx, y:ny});
-      score += level*10;
-    } else {
-      score += level*25;
-    }
-    scoreEl.textContent = score;
+    const level=a.custom.level;
+    const nx=(a.position.x+b.position.x)/2;
+    const ny=(a.position.y+b.position.y)/2;
+    World.remove(world,a);World.remove(world,b);
+    if(level<IMG_COUNT){
+      const c=addPiece(level+1,nx);
+      Matter.Body.setPosition(c,{x:nx,y:ny});
+      score+=level*10;
+    } else score+=level*25;
+    scoreEl.textContent=score;
   }
 
   function scheduleNextLevel(){
-    const r = Math.random();
-    if(r < .6) nextLevel = 1;
-    else if(r < .85) nextLevel = 2;
-    else if(r < .95) nextLevel = 3;
-    else nextLevel = 4;
-    nextEl.textContent = nextLevel;
+    const r=Math.random();
+    nextLevel = r<.6?1 : r<.85?2 : r<.95?3 : 4;
+    nextEl.textContent=nextLevel;
   }
 
   function initControls(){
-    canvas.addEventListener('mousemove', e=>{
-      const rect = canvas.getBoundingClientRect();
-      dropX = (e.clientX - rect.left) * (canvas.width/rect.width);
-    });
-    canvas.addEventListener('touchmove', e=>{
-      const rect = canvas.getBoundingClientRect();
-      const t = e.touches[0];
-      dropX = (t.clientX - rect.left) * (canvas.width/rect.width);
-    }, {passive:true});
-
-    const drop = ()=>{
-      if(!allowDrop || gameOver) return;
-      addPiece(nextLevel, Math.max(30, Math.min(canvas.width-30, dropX)));
+    const move=e=>{
+      const rect=canvas.getBoundingClientRect();
+      const clientX=e.touches?e.touches[0].clientX:e.clientX;
+      dropX=(clientX-rect.left)*(canvas.width/rect.width);
+    };
+    const drop=()=>{
+      if(!allowDrop||gameOver)return;
+      started=true;
+      addPiece(nextLevel,Math.max(30,Math.min(canvas.width-30,dropX)));
       scheduleNextLevel();
     };
-    canvas.addEventListener('click', drop);
-    canvas.addEventListener('touchend', ()=>{ drop(); }, {passive:true});
+    canvas.addEventListener('mousemove',move);
+    canvas.addEventListener('touchmove',move,{passive:true});
+    canvas.addEventListener('click',drop);
+    canvas.addEventListener('touchend',drop,{passive:true});
+  }
+
+  function endGame(){
+    if(gameOver) return;
+    gameOver=true;allowDrop=false;
+    const panel=document.getElementById('start');
+    panel.style.display='flex';
+    panel.querySelector('h1').innerText='Game Over 💥';
+    panel.querySelector('p').innerText='Thanks for smiling with Yeo Jin-goo 🌸';
+    panel.querySelector('button').textContent='Play again';
   }
 
   async function boot(){
-    textures = await loadImages(IMG_PATHS);
+    textures=await loadImages(IMG_PATHS);
     setupMatter();
     initControls();
     scheduleNextLevel();
-    allowDrop = true;
+    allowDrop=true;
   }
 
-  window.startGame = ()=>{
+  window.startGame=()=>{
     document.getElementById('start').style.display='none';
     if(engine){
-      const bodies = Matter.Composite.allBodies(engine.world);
-      for(const b of bodies){
-        if(!b.isStatic) Matter.World.remove(engine.world, b);
-      }
-      score = 0; scoreEl.textContent = '0';
-      gameOver = false;
-      scheduleNextLevel();
-      allowDrop = true;
+      const bodies=Matter.Composite.allBodies(engine.world);
+      for(const b of bodies){if(!b.isStatic)Matter.World.remove(engine.world,b);}
+      score=0;scoreEl.textContent='0';gameOver=false;started=false;
+      scheduleNextLevel();allowDrop=true;
       return;
     }
     boot();
@@ -286,4 +255,3 @@
 </script>
 </body>
 </html>
-

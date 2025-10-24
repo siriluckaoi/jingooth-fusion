@@ -298,15 +298,26 @@ function setupMatter(){
     }
   });
 }
-function addPiece(level,x=210){
-  const r=18+level*6,tex=textures[level-1];
-  const body=Bodies.circle(x,90,r,{
-    restitution:0.15,friction:0.001,
-    render:{sprite:{texture:tex.src,xScale:(r*2)/tex.width,yScale:(r*2)/tex.height}}
+function addPiece(level, x = 210){
+  // ลูกใหญ่ขึ้น: สมดุล (r = 22 + level * 7)
+  const r = 22 + level * 7;
+  const tex = textures[level - 1];
+
+  const body = Bodies.circle(x, 90, r, { // y=90 ตามเดิม
+    restitution: 0.15,
+    friction: 0.001,
+    render: {
+      sprite: {
+        texture: tex.src,
+        xScale: (r * 2) / tex.width,
+        yScale: (r * 2) / tex.height
+      }
+    }
   });
-  body.custom={level};
-  World.add(world,body);
-  playSound('drop',false,0.5);
+
+  body.custom = { level };
+  World.add(world, body);
+  playSound('drop', false, 0.5);
   return body;
 }
 function merge(a,b){

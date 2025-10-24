@@ -49,20 +49,20 @@ canvas.fx {
 .pulse{animation:scorePulse .3s ease-in-out;}
 @keyframes scorePulse{0%{transform:scale(1);}50%{transform:scale(1.25);}100%{transform:scale(1);}}
 
-/* BGM toggle button */
-.btn{
-  border:none;border-radius:12px;padding:12px 18px;margin:6px;
-  font-weight:700;font-size:16px;color:#fff;cursor:pointer;
-}
-.btn.primary{background:#8aa7ff;}
-.btn.secondary{background:linear-gradient(145deg,#ffa8d8,#ffbde5); border:2px solid #ff87ca;}
-.btn.small{
+/* Small sound buttons (stacked vertical, top-right) */
+.sound-controls{
   position:absolute;top:3%;right:4%;
-  font-size:14px;background:#ffbde5;border:2px solid #ff87ca;color:#fff;
-  border-radius:12px;padding:6px 10px;cursor:pointer;
-  box-shadow:0 3px 6px rgba(0,0,0,.1);
+  display:none; /* โชว์ตอนเล่นเท่านั้น */
+  flex-direction:column;gap:6px;z-index:2;
 }
-.btn.small:active{transform:scale(0.95);}
+.btn-icon{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,200,220,0.75);
+  border:2px solid #fff; box-shadow:0 3px 6px rgba(0,0,0,.12);
+  font-size:18px; color:#fff; cursor:pointer; user-select:none;
+}
+.btn-icon:active{ transform:scale(0.95); }
 
 /* Start / GameOver Panel */
 .panel{
@@ -75,23 +75,26 @@ canvas.fx {
 }
 .card h1{font-size:22px;margin-bottom:8px;color:#ff5b8a;}
 .card p{font-size:14px;color:#555;margin-bottom:12px;}
-
-/* Realtime Leaderboard (Top 5) – left-top under score */
-.leaderboard{
-  position:absolute;top:8%;left:4%;
-  min-width:180px;max-width:220px;
-  background:rgba(255,255,255,0.85);
-  border:2px solid #e6e6e8;border-radius:14px;
-  padding:8px 10px;box-shadow:0 4px 10px rgba(0,0,0,.08);
-  display:none; /* เริ่มต้นยังไม่แสดง จนกด Start */
+.btn{
+  border:none;border-radius:12px;padding:12px 18px;margin:6px 6px 10px;
+  font-weight:700;font-size:16px;color:#fff;cursor:pointer;
 }
-.leaderboard h3{
+.btn.primary{background:#8aa7ff;}
+.btn.secondary{background:linear-gradient(145deg,#ffa8d8,#ffbde5); border:2px solid #ff87ca;}
+
+/* Leaderboard inside GameOver panel */
+.lb-panel{
+  margin-top:10px;text-align:left;
+  background:#fafafa;border:2px solid #e6e6e8;border-radius:14px;
+  padding:10px 12px;
+}
+.lb-panel h3{
   margin:0 0 6px 0;font-size:14px;font-weight:800;color:#7b7e8a;
 }
-.leaderboard ol{
-  list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px;
+.lb-panel ol{
+  list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;
 }
-.leaderboard li{
+.lb-panel li{
   font-size:13px;color:#9aa0aa;font-weight:700;
   background:#ffffff;border:1px solid #ececf1;border-radius:10px;
   padding:6px 8px;
@@ -118,16 +121,11 @@ footer{
     <img id="preview" src="">
     <div class="scorebox">⭐ <span id="score">0</span></div>
 
-    <!-- Realtime Leaderboard (จะแสดงหลัง Start) -->
-    <div id="lb" class="leaderboard">
-      <h3>🏆 Top 5 Smiles</h3>
-      <ol id="lbList">
-        <!-- rows filled by Firestore onSnapshot -->
-      </ol>
+    <!-- สองปุ่มเสียง (โชว์เฉพาะตอนเล่น) -->
+    <div id="soundControls" class="sound-controls">
+      <button id="btnBGM" class="btn-icon" title="Toggle BGM">🎵</button>
+      <button id="btnSFX" class="btn-icon" title="Toggle SFX">🔊</button>
     </div>
-
-    <!-- Toggle BGM -->
-    <button id="toggleBGM" class="btn small">🔊 BGM On</button>
   </div>
 
   <!-- Start/GameOver Panel -->
@@ -137,36 +135,37 @@ footer{
       <p>Tap to drop and merge the smiling faces!</p>
       <button class="btn primary" id="btnStart">Start Game</button>
       <button class="btn secondary" id="btnBack" style="display:none;" onclick="window.location.href='index.html'">🏠 Back to Main</button>
+
+      <!-- Leaderboard จะเติมตอน Game Over -->
+      <div id="lbPanel" class="lb-panel" style="display:none;">
+        <h3>🏆 Top 5 Smiles</h3>
+        <ol id="lbList"></ol>
+      </div>
     </div>
   </div>
 
   <footer>by: namaoi.sweet 💕</footer>
 
-  <!-- Local audio assets (WAV first; คุณมีไฟล์ใน sounds/ แล้ว) -->
-  <audio id="aud-drop" preload="auto"><source src="sounds/drop.wav" type="audio/wav"></audio>
-  <audio id="aud-merge" preload="auto"><source src="sounds/merge.wav" type="audio/wav"></audio>
-  <audio id="aud-over" preload="auto"><source src="sounds/over.wav" type="audio/wav"></audio>
-  <audio id="aud-bgm" preload="auto" loop><source src="sounds/bgm.wav" type="audio/wav"></audio>
+  <!-- Local audio assets -->
+  <audio id="aud-drop" preload="auto"><source src="sounds/drop.wav" type="audio/wav"></source></audio>
+  <audio id="aud-merge" preload="auto"><source src="sounds/merge.wav" type="audio/wav"></source></audio>
+  <audio id="aud-over" preload="auto"><source src="sounds/over.wav" type="audio/wav"></source></audio>
+  <audio id="aud-bgm" preload="auto" loop><source src="sounds/bgm.wav" type="audio/wav"></source></audio>
 
 <script>
 /* ==========================================================
-   Audio Subsystem v2 — Hybrid WebAudio + HTMLAudio fallback
+   Audio Subsystem — Hybrid + Toggles for BGM & SFX
 ========================================================== */
-let audioCtx=null,audioBuffers={},buffersReady=false,audioUnlocked=false,bgmPlayingEl=null;
+let audioCtx=null,audioBuffers={},buffersReady=false,audioUnlocked=false,bgmEl=null;
+let bgmOn=true, sfxOn=true;
 
 const SOUND_URLS={drop:'sounds/drop.wav',merge:'sounds/merge.wav',over:'sounds/over.wav',bgm:'sounds/bgm.wav'};
-const FALLBACK_CDN={ // สำรอง (เผื่อไฟล์หาย) — ไม่ค่อยถูกเรียกใช้
-  drop:'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2f5a0e7b8f.mp3?filename=pop-94319.mp3',
-  merge:'https://cdn.pixabay.com/download/audio/2021/09/06/audio_00e08ad807.mp3?filename=soft-bling-1046.mp3',
-  over:'https://cdn.pixabay.com/download/audio/2022/03/15/audio_34563f6ef3.mp3?filename=cute-little-failure-94669.mp3',
-  bgm:'https://cdn.pixabay.com/download/audio/2022/03/09/audio_bf188c76da.mp3?filename=happy-day-11157.mp3'
-};
 
 async function ensureAudioUnlocked(){
   if(audioUnlocked) return;
   if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
   try{await audioCtx.resume();}catch{}
-  // prime HTMLAudio (iOS require)
+  // prime HTMLAudio for iOS
   for(const id of ['aud-drop','aud-merge','aud-over','aud-bgm']){
     const el=document.getElementById(id); if(!el) continue;
     try{ el.muted=true; await el.play().catch(()=>{}); el.pause(); el.currentTime=0; el.muted=false; }catch{}
@@ -182,47 +181,54 @@ async function ensureAudioUnlocked(){
 async function initAudio(){
   if(buffersReady) return;
   if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  const loadBuffer=async(urlPrimary,urlFallback)=>{
-    try{ const r=await fetch(urlPrimary,{cache:'force-cache',mode:'cors'}); const ab=await r.arrayBuffer(); return await audioCtx.decodeAudioData(ab);
-    }catch(e){
-      try{ const r2=await fetch(urlFallback,{cache:'force-cache',mode:'cors'}); const ab2=await r2.arrayBuffer(); return await audioCtx.decodeAudioData(ab2);}catch(e2){return null;}
-    }
+  const loadBuffer=async(url)=>{
+    try{ const r=await fetch(url,{cache:'force-cache',mode:'cors'}); const ab=await r.arrayBuffer(); return await audioCtx.decodeAudioData(ab); }
+    catch(e){ return null; }
   };
-  audioBuffers.drop  = await loadBuffer(SOUND_URLS.drop,  FALLBACK_CDN.drop);
-  audioBuffers.merge = await loadBuffer(SOUND_URLS.merge, FALLBACK_CDN.merge);
-  audioBuffers.over  = await loadBuffer(SOUND_URLS.over,  FALLBACK_CDN.over);
+  audioBuffers.drop  = await loadBuffer(SOUND_URLS.drop);
+  audioBuffers.merge = await loadBuffer(SOUND_URLS.merge);
+  audioBuffers.over  = await loadBuffer(SOUND_URLS.over);
   buffersReady=true;
 }
 function playSound(name,loop=false,vol=1){
   if(name==='bgm'){ playBGM(vol); return; }
+  if(!sfxOn) return; // ปิด SFX
   const canWA=audioCtx && audioCtx.state!=='closed' && audioBuffers[name];
   if(canWA){
     try{ if(audioCtx.state==='suspended') audioCtx.resume();
       const src=audioCtx.createBufferSource(); const gain=audioCtx.createGain();
       src.buffer=audioBuffers[name]; gain.gain.value=vol;
-      src.connect(gain).connect(audioCtx.destination); src.start(0); return src;
+      src.connect(gain).connect(audioCtx.destination); src.start(0);
+      return src;
     }catch(e){}
   }
   // fallback HTMLAudio
-  const idMap={drop:'aud-drop',merge:'aud-merge',over:'aud-over'};
-  const el=document.getElementById(idMap[name]); if(!el) return;
+  const map={drop:'aud-drop',merge:'aud-merge',over:'aud-over'};
+  const el=document.getElementById(map[name]); if(!el) return;
   const clone=el.cloneNode(); clone.volume=vol; clone.play().catch(()=>{});
 }
 function playBGM(vol=0.22){
+  if(!bgmOn) return;
   const el=document.getElementById('aud-bgm'); if(!el) return;
-  el.loop=true; el.volume=vol; el.play().catch(()=>{}); bgmPlayingEl=el;
+  el.loop=true; el.volume=vol; el.play().catch(()=>{});
+  bgmEl=el;
 }
 function stopBGM(){
-  const el=bgmPlayingEl||document.getElementById('aud-bgm'); if(!el) return;
-  try{ el.pause(); el.currentTime=0; }catch{} bgmPlayingEl=null;
+  const el=bgmEl||document.getElementById('aud-bgm'); if(!el) return;
+  try{ el.pause(); el.currentTime=0; }catch{} bgmEl=null;
 }
-/* BGM toggle */
-const toggleBGMBtn=document.getElementById('toggleBGM');
-let bgmOn=true;
-toggleBGMBtn.addEventListener('click',()=>{
+
+/* Sound buttons */
+const btnBGM=document.getElementById('btnBGM');
+const btnSFX=document.getElementById('btnSFX');
+btnBGM.addEventListener('click',()=>{
   bgmOn=!bgmOn;
-  if(bgmOn){ playBGM(0.22); toggleBGMBtn.textContent='🔊 BGM On'; }
-  else { stopBGM(); toggleBGMBtn.textContent='🔇 BGM Off'; }
+  if(bgmOn){ btnBGM.textContent='🎵'; playBGM(0.22); }
+  else { btnBGM.textContent='❌🎵'; stopBGM(); }
+});
+btnSFX.addEventListener('click',()=>{
+  sfxOn=!sfxOn;
+  btnSFX.textContent = sfxOn ? '🔊' : '🔇';
 });
 </script>
 
@@ -242,10 +248,8 @@ const preview=document.getElementById('preview');
 const panel=document.getElementById('panel');
 const btnStart=document.getElementById('btnStart');
 const btnBack=document.getElementById('btnBack');
-const lbBox=document.getElementById('lb');
-const lbList=document.getElementById('lbList');
+const soundControls=document.getElementById('soundControls');
 
-// Sparkle FX
 const fxParticles=[];
 function sparkle(x,y){
   for(let i=0;i<16;i++){
@@ -358,13 +362,10 @@ async function boot(){
   setupMatter(); initControls(); scheduleNextLevel(); allowDrop=true;
 }
 btnStart.addEventListener('click', async ()=>{
-  await ensureAudioUnlocked();  // ปลดล็อกเสียง
-  await initAudio();            // โหลด buffer SFX
-  playBGM(0.22);                // เปิด BGM
+  await ensureAudioUnlocked(); await initAudio(); playBGM(0.22);
+  // เข้าเล่น → ซ่อน panel, โชว์ปุ่มเสียง
   panel.style.display='none';
-  // แสดง Leaderboard (เริ่มฟัง realtime ตั้งแต่ตอนนี้)
-  lbBox.style.display='block';
-  startLeaderboardRealtime();   // เริ่มเชื่อม Firestore มุมซ้ายบน
+  soundControls.style.display='flex';
   if(engine){
     const bodies=Matter.Composite.allBodies(engine.world);
     for(const b of bodies){ if(!b.isStatic) Matter.World.remove(world,b); }
@@ -378,19 +379,20 @@ function endGame(){
   if(gameOver) return;
   gameOver=true; allowDrop=false;
   stopBGM(); playSound('over',false,0.8);
+  // ออกจากเล่น → ซ่อนปุ่มเสียง, โชว์ panel + leaderboard
+  soundControls.style.display='none';
   panel.style.display='flex';
   panel.querySelector('h1').innerText='Game Over 💥';
   panel.querySelector('p').innerText='Thanks for smiling with Yeo Jin Goo 🌸';
   btnStart.textContent='🔄 Play Again';
   btnBack.style.display='inline-block';
-  // เซฟคะแนนไป Firestore (หลังจบ)
-  saveScoreFlow();
+  // เซฟคะแนน + โหลด Top5
+  saveScoreFlow().then(loadTop5Once);
 }
 </script>
 
 <!-- =========================
-     Firebase (via official CDN)
-     * ใช้ config ของคุณ *
+     Firebase (CDN official)
 ========================= -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -430,40 +432,36 @@ function getPlayerName(){
   return n;
 }
 
-/* Flow เมื่อเกมจบ → บันทึก + อัปเดตหน้า */
+/* Flow เมื่อเกมจบ → บันทึกคะแนน */
 async function saveScoreFlow(){
   const name = getPlayerName();
-  await saveScore(name, parseInt(document.getElementById('score').textContent||"0",10));
-  // realtime กำลังทำงานอยู่แล้วจาก startLeaderboardRealtime()
+  const sc = parseInt(document.getElementById('score').textContent||"0",10);
+  await saveScore(name, sc);
 }
 
-/* แสดง Leaderboard แบบ realtime (Top 5) */
-let lbUnsub = null;
-function startLeaderboardRealtime(){
-  // ป้องกันสมัครซ้ำ
-  if(lbUnsub) return;
-  lbUnsub = db.collection("scores")
-    .orderBy("score","desc")
-    .limit(5)
-    .onSnapshot((snap)=>{
-      const list = document.getElementById('lbList');
-      list.innerHTML = "";
-      snap.forEach(doc=>{
-        const d=doc.data();
-        const name = (d.name||"Guest");
-        const sc   = (d.score||0);
-        const li = document.createElement('li');
-        li.textContent = `${name} — ${sc}`;
-        list.appendChild(li);
-      });
-    }, (err)=>console.warn("onSnapshot error:", err));
+/* โหลด Top 5 เฉพาะตอน Game Over (ไม่แสดงระหว่างเล่น) */
+async function loadTop5Once(){
+  const panelBox = document.getElementById('lbPanel');
+  const list = document.getElementById('lbList');
+  try{
+    const snap = await db.collection("scores").orderBy("score","desc").limit(5).get();
+    list.innerHTML = "";
+    snap.forEach(doc=>{
+      const d=doc.data();
+      const li=document.createElement('li');
+      li.textContent = `${(d.name||"Guest")} — ${(d.score||0)}`;
+      list.appendChild(li);
+    });
+    panelBox.style.display='block';
+  }catch(e){
+    console.warn('Top5 load error:', e);
+    panelBox.style.display='none';
+  }
 }
-</script>
 
-<!-- =========================
-     หมายเหตุ Firestore Rules (10 ปี)
-     ไปที่ Firebase console → Build → Firestore Database → Rules
-     ตั้งเป็น:
+/* -----------------------------
+   Firestore rule (แนะนำ 10 ปี)
+   ไปที่ Firestore → Rules ปรับเป็น
 
 rules_version = '2';
 service cloud.firestore {
@@ -473,7 +471,8 @@ service cloud.firestore {
     }
   }
 }
+----------------------------- */
+</script>
 
-========================= -->
 </body>
 </html>
